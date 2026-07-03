@@ -601,7 +601,7 @@ select.input { cursor: pointer; padding: 0 12px; }
 }
 .footer__brand-row { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-2); }
 .footer__brand-row img { display: block; opacity: 0.45; flex-shrink: 0; }
-.footer__brand-name { font-family: var(--font-sans); font-size: var(--text-sm); font-weight: var(--weight-semibold); color: var(--text-primary); }
+.footer__brand-name { font-family: var(--font-sans); font-size: var(--text-sm); font-weight: var(--weight-semibold); color: var(--text-muted); }
 .footer__credit { font-size: var(--text-sm); color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
 .footer__credit a { color: var(--text-muted); display: inline-flex; align-items: center; gap: 5px; }
 .footer__credit a img { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; display: block; flex-shrink: 0; border: 1px solid var(--border); }

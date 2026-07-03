@@ -7,7 +7,7 @@
   const BY_ID = Object.fromEntries(TOOLS.map((t) => [t.id, t]));
 
   // Bump this when the library's content is updated.
-  const LAST_UPDATED = 'June 18, 2026';
+  const LAST_UPDATED = 'July 3, 2026';
 
   // Web3Forms endpoint for the "Submit a Tool" form. The access key is public by design
   // (Web3Forms routes it to the maintainer's inbox and handles spam filtering server-side).

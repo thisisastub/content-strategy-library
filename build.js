@@ -21,8 +21,13 @@ const vm = require('vm');
 const ROOT = __dirname;
 const SITE = 'https://contentstrategylibrary.com';
 const AUTHOR = { name: 'Tommy Stubblefield', url: 'https://stubblefield.info' };
-const BUILD_DATE = process.env.CSL_BUILD_DATE || new Date().toISOString().slice(0, 10);
+const BUILD_DATE = process.env.CSL_BUILD_DATE || new Date().toISOString().slice(0, 10); // YYYY-MM-DD (sitemap lastmod)
 const FIRST_PUBLISHED = '2026-01-01';
+// Full ISO 8601 with timezone offset for schema.org datePublished/dateModified.
+// (Bare YYYY-MM-DD is flagged by Google's Rich Results Test as missing a timezone.)
+const isoDateTime = (ymd) => ymd + 'T00:00:00+00:00';
+const FIRST_PUBLISHED_ISO = isoDateTime(FIRST_PUBLISHED);
+const BUILD_ISO = isoDateTime(BUILD_DATE);
 
 /* ---------- Load data.js in a sandbox (no fork of content) ---------- */
 function loadData() {
@@ -256,8 +261,8 @@ function renderToolPage(data, tool) {
     mainEntityOfPage: canonical,
     author: { '@id': PERSON_ID },
     publisher: { '@id': ORG_ID },
-    datePublished: FIRST_PUBLISHED,
-    dateModified: BUILD_DATE,
+    datePublished: FIRST_PUBLISHED_ISO,
+    dateModified: BUILD_ISO,
     articleSection: catName,
     about: {
       '@type': 'DefinedTerm',

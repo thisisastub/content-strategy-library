@@ -21,6 +21,7 @@ const vm = require('vm');
 const ROOT = __dirname;
 const SITE = 'https://contentstrategylibrary.com';
 const AUTHOR = { name: 'Tommy Stubblefield', url: 'https://stubblefield.info' };
+const GA_MEASUREMENT_ID = 'G-HV8NC230YM'; // Google Analytics 4 (GA4) — property "ConStratLib site"
 const BUILD_DATE = process.env.CSL_BUILD_DATE || new Date().toISOString().slice(0, 10); // YYYY-MM-DD (sitemap lastmod)
 const FIRST_PUBLISHED = '2026-01-01';
 // Full ISO 8601 with timezone offset for schema.org datePublished/dateModified.
@@ -96,6 +97,9 @@ function head(opts) {
     '<head>',
     '  <meta charset="utf-8">',
     '  <meta name="viewport" content="width=device-width, initial-scale=1">',
+    '  <!-- Google tag (gtag.js) — GA4 -->',
+    '  <script async src="https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID + '"></script>',
+    '  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","' + GA_MEASUREMENT_ID + '");</script>',
     '  <title>' + esc(opts.title) + '</title>',
     '  <meta name="description" content="' + escAttr(opts.description) + '">',
     '  <meta name="robots" content="' + robots + '">',

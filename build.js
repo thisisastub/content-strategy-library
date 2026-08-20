@@ -59,6 +59,26 @@ function writeFile(relPath, contents) {
   return relPath;
 }
 
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'];
+function humanDate(ymd) {
+  const [y, m, d] = ymd.split('-').map(Number);
+  return MONTHS[m - 1] + ' ' + d + ', ' + y;
+}
+
+// Keep the SPA footer's "Last updated" line in sync with the build date, so it
+// can never go stale. Rewrites the LAST_UPDATED constant in js/app.js in place.
+function stampLastUpdated() {
+  const p = path.join(ROOT, 'js', 'app.js');
+  const src = fs.readFileSync(p, 'utf8');
+  const next = src.replace(
+    /const LAST_UPDATED = '[^']*';/,
+    "const LAST_UPDATED = '" + humanDate(BUILD_DATE) + "';"
+  );
+  if (next !== src) { fs.writeFileSync(p, next); return true; }
+  return false;
+}
+
 /* ---------- shared page chrome ---------- */
 function head(opts) {
   // opts: { title, description, canonical, ogType, robots, jsonld[] }
@@ -695,6 +715,10 @@ function build() {
 
   const written = [];
   const w = (p, c) => written.push(writeFile(p, c));
+
+  // Stamp the footer "Last updated" date before generating pages (so the value
+  // baked into any inline references matches). app.js itself is served as-is.
+  if (stampLastUpdated()) console.log('  stamped "Last updated" → ' + humanDate(BUILD_DATE));
 
   // Homepage. Overwriting root index.html replaces the SPA entry with the
   // prerendered+hydrating page. Hydration is wired, so this is safe; gated

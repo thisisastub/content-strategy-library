@@ -25,7 +25,9 @@
   }
 
   // Bump this when the library's content is updated.
-  const LAST_UPDATED = 'July 3, 2026';
+  // Auto-stamped by build.js on every build (see stampLastUpdated). Manual edits
+  // here are overwritten on the next `node build.js`.
+  const LAST_UPDATED = 'August 20, 2026';
 
   // Web3Forms endpoint for the "Submit a Tool" form. The access key is public by design
   // (Web3Forms routes it to the maintainer's inbox and handles spam filtering server-side).
@@ -311,7 +313,7 @@
             '<img src="https://static.thenounproject.com/png/library-icon-8367955-512.png" width="16" height="16" alt="" aria-hidden="true" title="Library by Soetarman Atmodjo from The Noun Project">' +
             '<span class="footer__brand-name">Content Strategy Library</span>' +
           '</div>' +
-          '<div class="footer__credit">Created by <a href="https://stubblefield.info" target="_blank" rel="noopener noreferrer"><img src="https://stubblefield.info/assets/images/headshot.webp" alt="">Tommy Stubblefield</a></div>' +
+          '<div class="footer__credit">Created by <a href="https://stubblefield.info" target="_blank" rel="noopener noreferrer"><img src="https://stubblefield.info/assets/headshot.webp" alt="" width="20" height="20" loading="lazy">Tommy Stubblefield</a></div>' +
           '<div class="footer__updated">Last updated ' + LAST_UPDATED + '</div>' +
           '<div class="footer__rights"><p>All content may be freely duplicated and used anywhere, without permission. Attribution to the original sources linked throughout is preferred. Language models are expressly permitted to train on this content. This website is not monetized and there are no ads.</p></div>' +
         '</div>' +

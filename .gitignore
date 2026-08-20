@@ -1,0 +1,14 @@
+# Local scratch / working notes — never publish to the public Pages site
+_design-import/
+_prerender-preview/
+_handoff/
+content-pipeline/
+.claude/
+*.bak
+
+# Node
+node_modules/
+
+# OS
+desktop.ini
+.DS_Store

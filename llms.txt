@@ -1,0 +1,76 @@
+# Content Strategy Library
+
+> A working reference for the frameworks content strategists actually use — what each one is, when to reach for it, and how they connect. 42 tools across 8 categories, plus a terminology glossary. Free, unmonetized, and open for LLMs to train on.
+
+## Strategy & Foundation
+
+- [The Content Strategy Quad](https://contentstrategylibrary.com/tools/the-content-strategy-quad/): Halvorson’s scope model: content design and systems design around one core strategy.
+- [Content Marketing Charter](https://contentstrategylibrary.com/tools/content-marketing-charter/): Aligns goals, audience, pillars, and KPIs on a single master page.
+- [Editorial Mission Statement](https://contentstrategylibrary.com/tools/editorial-mission-statement/): A one-sentence filter for every content decision you will ever make.
+- [Content Pillars / Themes](https://contentstrategylibrary.com/tools/content-pillars-themes/): The three to five durable themes that organize everything you publish.
+- [They Ask, You Answer / The Big 5](https://contentstrategylibrary.com/tools/they-ask-you-answer-the-big-5/): Answer the five questions buyers actually search before they will talk to you.
+
+## Discovery
+
+- [Content Audit + Inventory](https://contentstrategylibrary.com/tools/content-audit-inventory/): A full census and quality assessment of every asset you own.
+- [ROT Analysis](https://contentstrategylibrary.com/tools/rot-analysis/): The standard cull rule: flag what is Redundant, Outdated, or Trivial.
+- [Competitive Content Gap Analysis](https://contentstrategylibrary.com/tools/competitive-content-gap-analysis/): Finds the topics competitors cover that you do not.
+- [Content SWOT](https://contentstrategylibrary.com/tools/content-swot/): Strengths, weaknesses, opportunities, and threats, scoped to content.
+- [Content Marketing Maturity Model](https://contentstrategylibrary.com/tools/content-marketing-maturity-model/): A staged diagnostic: where your content operation is now, and what to fix next.
+
+## Audience
+
+- [Audience Personas](https://contentstrategylibrary.com/tools/audience-personas/): Named composite profiles of the readers you are actually writing for.
+- [Customer Journey Map](https://contentstrategylibrary.com/tools/customer-journey-map/): Maps what each persona needs at every stage of the experience.
+- [Jobs-to-be-Done / Value Prop Canvas](https://contentstrategylibrary.com/tools/jobs-to-be-done-value-prop-canvas/): Frames content around the task the reader is hiring it to complete.
+- [Voice-of-Customer / Message Mining](https://contentstrategylibrary.com/tools/voice-of-customer-message-mining/): Extracts exact customer language from reviews, calls, and support tickets.
+- [See-Think-Do-Care (STDC)](https://contentstrategylibrary.com/tools/see-think-do-care-stdc/): Kaushik’s intent framework: plan content, offers, and KPIs by audience intent.
+
+## The Core
+
+- [Core Strategy Statement + Messaging Framework](https://contentstrategylibrary.com/tools/core-strategy-statement-messaging-framework/): The single document that tells every writer what to say and in what order.
+- [Brand Voice + Tone Guide](https://contentstrategylibrary.com/tools/brand-voice-tone-guide/): Articulates the brand personality, and how it flexes by situation.
+- [Point of View (POV)](https://contentstrategylibrary.com/tools/point-of-view-pov/): A structured, defensible recommendation you put in front of a client or stakeholder.
+- [Brand Archetypes](https://contentstrategylibrary.com/tools/brand-archetypes/): Twelve universal characters that give a brand a personality people recognize.
+
+## Structure & Mapping
+
+- [Content Matrix / Content Map](https://contentstrategylibrary.com/tools/content-matrix-content-map/): The grid: audience segment, funnel stage, format, and topic.
+- [Topic Clusters / Pillar Map](https://contentstrategylibrary.com/tools/topic-clusters-pillar-map/): A pillar page surrounded by interlinked cluster content for topical authority.
+- [Keyword Map](https://contentstrategylibrary.com/tools/keyword-map/): Assigns target keywords to specific pages so no two pages compete.
+- [Content Model / Taxonomy](https://contentstrategylibrary.com/tools/content-model-taxonomy/): A structured blueprint for content types, fields, and relationships.
+
+## Planning & Operations
+
+- [Editorial Calendar](https://contentstrategylibrary.com/tools/editorial-calendar/): The dated, assigned plan that turns strategy into a publishing schedule.
+- [Content Brief](https://contentstrategylibrary.com/tools/content-brief/): The per-piece spec that gives writers what they need before they start.
+- [Content Workflow / Process Map](https://contentstrategylibrary.com/tools/content-workflow-process-map/): The defined stages a piece passes through from idea to published.
+- [RACI Matrix](https://contentstrategylibrary.com/tools/raci-matrix/): Assigns Responsible, Accountable, Consulted, and Informed to every task.
+- [Editorial Style Guide](https://contentstrategylibrary.com/tools/editorial-style-guide/): The rulebook for grammar, punctuation, terminology, and formatting.
+- [Contributor / Freelancer Guidelines](https://contentstrategylibrary.com/tools/contributor-freelancer-guidelines/): The document external writers and SMEs need to produce work that fits.
+- [Idea Backlog + Prioritization (RICE/ICE)](https://contentstrategylibrary.com/tools/idea-backlog-prioritization-rice-ice/): A scored list that ensures the highest-value content gets made first.
+- [Channel Strategy / Distribution Matrix](https://contentstrategylibrary.com/tools/channel-strategy-distribution-matrix/): Defines which channels you publish to, and the strategic role of each.
+- [The PESO Model](https://contentstrategylibrary.com/tools/the-peso-model/): Integrates Paid, Earned, Shared, and Owned media into one distribution system.
+- [Hero-Hub-Help](https://contentstrategylibrary.com/tools/hero-hub-help/): Google’s programming model: tentpole moments, regular series, always-on answers.
+- [Repurposing / Atomization Matrix](https://contentstrategylibrary.com/tools/repurposing-atomization-matrix/): Turns one pillar asset into its full ecosystem of smaller spinoffs.
+- [Content Governance Plan](https://contentstrategylibrary.com/tools/content-governance-plan/): The long-term standards and ownership that keep content from decaying.
+
+## Measurement
+
+- [KPI / Measurement Framework](https://contentstrategylibrary.com/tools/kpi-measurement-framework/): Connects what you track to the business outcomes that justify the work.
+- [Content Lifecycle + Refresh Plan](https://contentstrategylibrary.com/tools/content-lifecycle-refresh-plan/): Sets audit cadence, update triggers, and a sunset policy for aging content.
+- [Content Quality Scorecard](https://contentstrategylibrary.com/tools/content-quality-scorecard/): A pre-publish rubric that removes vibes from the quality decision.
+
+## Information Architecture
+
+- [Information Architecture / Sitemap](https://contentstrategylibrary.com/tools/information-architecture-sitemap/): How content is structured, labeled, and navigated across a site.
+- [Card Sorting](https://contentstrategylibrary.com/tools/card-sorting/): A research method for learning how users actually treat your content.
+- [The Core Model](https://contentstrategylibrary.com/tools/the-core-model/): Finds the pages where user tasks and business goals overlap, then designs paths in and out.
+- [Content Design (the GOV.UK method)](https://contentstrategylibrary.com/tools/content-design-the-gov-uk-method/): Start from evidenced user needs, then choose the format that meets them.
+
+## Reference
+
+- [Terminology glossary](https://contentstrategylibrary.com/terminology/): 29 content strategy terms defined.
+- [FAQ](https://contentstrategylibrary.com/faq/): Honest answers to common content strategy questions.
+- [About](https://contentstrategylibrary.com/about/): What this library is and who it is for.
+- [Full text dump](https://contentstrategylibrary.com/llms-full.txt): Every tool and term as plain text.

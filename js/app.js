@@ -5,6 +5,24 @@
 (function () {
   const TOOLS = window.TOOLS;
   const BY_ID = Object.fromEntries(TOOLS.map((t) => [t.id, t]));
+  const BY_SLUG = Object.fromEntries(TOOLS.map((t) => [t.slug, t]));
+  const CAT_KEYS = new Set((window.CATEGORY_ORDER || []).map((c) => c[1]));
+
+  // ── Real-URL paths (History API). Build script and router agree on these. ──
+  function toolPath(t) {
+    const tool = typeof t === 'string' ? BY_ID[t] : t;
+    return tool ? '/tools/' + tool.slug + '/' : '/';
+  }
+  const catPath = (key) => '/categories/' + key + '/';
+  const VIEW_PATH = {
+    index: '/', terminology: '/terminology/', faq: '/faq/', about: '/about/',
+    recommend: '/recommend/', submit: '/submit/', workspace: '/workspace/'
+  };
+  // Navigate via History API, then re-render.
+  function navTo(path) {
+    if (path !== location.pathname) history.pushState(null, '', path);
+    render(true);
+  }
 
   // Bump this when the library's content is updated.
   const LAST_UPDATED = 'July 3, 2026';
@@ -270,17 +288,17 @@
       '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="nav__icon-close" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>';
     return '' +
       '<nav class="nav"><div class="nav__inner">' +
-        '<a class="nav__brand" href="#/" title="Library by Soetarman Atmodjo from The Noun Project">' +
+        '<a class="nav__brand" href="/" title="Library by Soetarman Atmodjo from The Noun Project">' +
           '<span class="nav__brand-mark">' + libIcon + '</span>' +
           '<span class="nav__brand-name">Content Strategy Library</span>' +
         '</a>' +
         '<button class="nav__toggle" data-action="nav-toggle" aria-label="Toggle menu">' + burger + '</button>' +
         '<div class="nav__links">' +
-          btn('#/', 'Library', { cls: 'ds-highlight-swipe' }) +
-          btn('#/terminology', 'Terminology', { cls: 'ds-highlight-swipe' }) +
-          btn('#/recommend', 'Tool Recommender', { cls: 'ds-highlight-swipe' }) +
-          btn('#/faq', 'FAQ', { cls: 'ds-highlight-swipe' }) +
-          btn('#/about', 'About', { cls: 'ds-highlight-swipe' }) +
+          btn('/', 'Library', { cls: 'ds-highlight-swipe' }) +
+          btn('/terminology/', 'Terminology', { cls: 'ds-highlight-swipe' }) +
+          btn('/recommend/', 'Tool Recommender', { cls: 'ds-highlight-swipe' }) +
+          btn('/faq/', 'FAQ', { cls: 'ds-highlight-swipe' }) +
+          btn('/about/', 'About', { cls: 'ds-highlight-swipe' }) +
         '</div>' +
       '</div></nav>';
   }
@@ -295,16 +313,16 @@
           '</div>' +
           '<div class="footer__credit">Created by <a href="https://stubblefield.info" target="_blank" rel="noopener noreferrer"><img src="https://stubblefield.info/assets/images/headshot.webp" alt="">Tommy Stubblefield</a></div>' +
           '<div class="footer__updated">Last updated ' + LAST_UPDATED + '</div>' +
-          '<div class="footer__rights"><p>All content may be freely duplicated and used anywhere, without permission. Attribution to the original sources linked throughout is preferred. Language models are expressly permitted to train on this content.</p></div>' +
+          '<div class="footer__rights"><p>All content may be freely duplicated and used anywhere, without permission. Attribution to the original sources linked throughout is preferred. Language models are expressly permitted to train on this content. This website is not monetized and there are no ads.</p></div>' +
         '</div>' +
         '<nav class="footer__nav">' +
-          '<a href="#/">Library</a>' +
-          '<a href="#/terminology">Terminology</a>' +
-          '<a href="#/workspace">Workspace</a>' +
-          '<a href="#/recommend">Tool Recommender</a>' +
-          '<a href="#/submit">Submit a Tool</a>' +
-          '<a href="#/faq">FAQ</a>' +
-          '<a href="#/about">About</a>' +
+          '<a href="/">Library</a>' +
+          '<a href="/terminology/">Terminology</a>' +
+          '<a href="/workspace/">Workspace</a>' +
+          '<a href="/recommend/">Tool Recommender</a>' +
+          '<a href="/submit/">Submit a Tool</a>' +
+          '<a href="/faq/">FAQ</a>' +
+          '<a href="/about/">About</a>' +
         '</nav>' +
       '</div></footer>';
   }
@@ -347,7 +365,7 @@
 
   function toolCard(t) {
     return '' +
-      '<a class="tool-card" href="#/tool/' + t.id + '">' +
+      '<a class="tool-card" href="' + toolPath(t) + '">' +
         '<div class="tool-card__top">' +
           '<img class="tool-card__icon" src="' + icon(t.id) + '" alt="">' +
           '<span class="tool-card__glyph">' + esc(t.glyph) + '</span>' +
@@ -368,7 +386,7 @@
       const paras = (n.paras || []).map((parts, pi) => {
         const inner = parts.map((part) => {
           if (typeof part === 'string') return esc(part);
-          if (part.tool) return '<a class="csl-body-link" href="#/tool/' + esc(part.tool) + '">' + esc(part.t) + '</a>';
+          if (part.tool) return '<a class="csl-body-link" href="' + toolPath(part.tool) + '">' + esc(part.t) + '</a>';
           return '<a class="csl-body-link" href="' + esc(part.url) + '" target="_blank" rel="noopener noreferrer">' + esc(part.t) + '</a>';
         }).join('');
         return '<p style="font-family:var(--font-sans);font-size:var(--text-base);line-height:var(--leading-relaxed);color:var(--text-primary);margin:' + (pi ? 'var(--space-4) 0 0' : '0') + '">' + inner + '</p>';
@@ -411,8 +429,8 @@
     const diagram = window.buildDiagram(t.id);
 
     const navGroup = '<div class="detail-nav-group">' +
-      (prev ? btn('#/tool/' + prev.id, '&larr; ' + esc(prev.name)) : '') +
-      (next ? btn('#/tool/' + next.id, esc(next.name) + ' &rarr;') : '') +
+      (prev ? btn(toolPath(prev), '&larr; ' + esc(prev.name)) : '') +
+      (next ? btn(toolPath(next), esc(next.name) + ' &rarr;') : '') +
     '</div>';
 
     const visual = diagram
@@ -430,12 +448,12 @@
     const related = t.related.map((rid) => {
       const r = BY_ID[rid];
       if (!r) return '';
-      return '<a class="related-card ds-highlight-swipe" href="#/tool/' + r.id + '"><img src="' + icon(r.id) + '" alt=""><div><h3>' + esc(r.name) + '</h3><p>' + esc(r.tagline) + '</p></div></a>';
+      return '<a class="related-card ds-highlight-swipe" href="' + toolPath(r) + '"><img src="' + icon(r.id) + '" alt=""><div><h3>' + esc(r.name) + '</h3><p>' + esc(r.tagline) + '</p></div></a>';
     }).join('');
 
     return shell(
       '<div class="shell-md">' +
-        '<div class="detail-topbar">' + btn('#/', '&larr; All tools') + navGroup + '</div>' +
+        '<div class="detail-topbar">' + btn('/', '&larr; All tools') + navGroup + '</div>' +
         '<header class="detail-header dashed-b">' +
           '<div class="detail-badge-row"><span class="badge badge--default">' + esc(t.category) + '</span></div>' +
           '<div class="detail-headline">' +
@@ -501,7 +519,7 @@
           '<h2>' + esc(t.name) + '</h2>' +
           '<p>' + esc(t.tagline) + '</p>' +
           '<div class="result-card__actions">' +
-            '<a class="btn btn--sm btn--secondary" href="#/tool/' + t.id + '">View this tool</a>' +
+            '<a class="btn btn--sm btn--secondary" href="' + toolPath(t) + '">View this tool</a>' +
             addBtn +
           '</div>' +
         '</div>' +
@@ -741,7 +759,7 @@
           '<div style="display:flex;align-items:center;gap:var(--space-3)"><span style="width:32px;height:32px;border-radius:var(--radius-sm);background:' + accent + ';color:' + accTx + ';font-family:var(--font-sans);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + esc(t.glyph) + '</span><img src="' + icon(t.id) + '" style="width:24px;height:24px;opacity:0.85"></div>' +
           '<div><h3 style="font-family:var(--font-sans);font-size:var(--text-lg);font-weight:var(--weight-bold);color:var(--text-primary);margin:0;letter-spacing:var(--tracking-tight);line-height:var(--leading-snug)">' + esc(t.name) + '</h3><div style="font-family:var(--font-sans);font-size:11px;font-weight:600;letter-spacing:var(--tracking-wide);text-transform:uppercase;color:var(--text-muted);margin-top:3px">' + esc(t.category) + '</div></div>' +
           '<p style="font-family:var(--font-sans);font-size:var(--text-sm);line-height:var(--leading-normal);color:var(--text-secondary);margin:0;flex:1">' + esc(t.tagline) + '</p>' +
-          '<a href="#/tool/' + t.id + '" style="align-self:flex-start;font-family:var(--font-sans);font-size:var(--text-sm);font-weight:600;color:var(--text-primary);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px">View tool &#8594;</a>' +
+          '<a href="' + toolPath(t) + '" style="align-self:flex-start;font-family:var(--font-sans);font-size:var(--text-sm);font-weight:600;color:var(--text-primary);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px">View tool &#8594;</a>' +
         '</div>'
       ).join('');
       toolsBlock = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:var(--space-3)">' + cards + '</div>';
@@ -751,7 +769,7 @@
           '<p style="font-family:var(--font-sans);font-size:var(--text-base);color:var(--text-secondary);margin:0 auto var(--space-6);max-width:46ch;line-height:var(--leading-normal)">Add tools by hand, or answer a few questions in the Recommender and add its suggestions here.</p>' +
           '<div style="display:flex;gap:var(--space-3);justify-content:center;flex-wrap:wrap">' +
             '<button data-action="ws-toggle-palette" style="font-family:var(--font-sans);font-size:var(--text-sm);font-weight:600;color:var(--ink-950);background:var(--highlight);border:none;border-radius:var(--radius-full);padding:9px 18px;cursor:pointer">+ Add a tool</button>' +
-            '<a href="#/recommend" style="font-family:var(--font-sans);font-size:var(--text-sm);font-weight:600;color:var(--text-primary);background:var(--bg-surface);border:1px solid var(--border-strong);border-radius:var(--radius-full);padding:9px 18px;text-decoration:none">Use the Recommender</a>' +
+            '<a href="/recommend/" style="font-family:var(--font-sans);font-size:var(--text-sm);font-weight:600;color:var(--text-primary);background:var(--bg-surface);border:1px solid var(--border-strong);border-radius:var(--radius-full);padding:9px 18px;text-decoration:none">Use the Recommender</a>' +
           '</div>' +
         '</div>';
     }
@@ -834,7 +852,7 @@
         '<header style="padding:var(--space-16) 0 var(--space-8);border-bottom:1px dashed var(--border-strong)">' +
           '<div style="display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-5)"><span class="badge badge--highlight">Workspace</span><span style="font-family:var(--font-sans);font-size:var(--text-sm);color:var(--text-muted)">' + countLabel + '</span></div>' +
           '<h1 style="font-family:var(--font-sans);font-size:var(--text-5xl);font-weight:var(--weight-bold);line-height:var(--leading-tight);letter-spacing:var(--tracking-tight);margin:0 0 var(--space-5);color:var(--text-primary);max-width:15ch">Your content strategy approach</h1>' +
-          '<p style="font-size:var(--text-lg);line-height:var(--leading-normal);max-width:60ch;color:var(--text-secondary);margin:0">Collect the tools that fit your situation, brand the page with your name or agency, and export a clean PDF or deck to share. Add tools by hand below, or let the <a href="#/recommend" style="color:var(--text-primary);font-weight:var(--weight-semibold);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px">Tool Recommender</a> suggest a starting set.</p>' +
+          '<p style="font-size:var(--text-lg);line-height:var(--leading-normal);max-width:60ch;color:var(--text-secondary);margin:0">Collect the tools that fit your situation, brand the page with your name or agency, and export a clean PDF or deck to share. Add tools by hand below, or let the <a href="/recommend/" style="color:var(--text-primary);font-weight:var(--weight-semibold);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px">Tool Recommender</a> suggest a starting set.</p>' +
         '</header>' +
         toolsSection + brandSection + exportSection + toast +
         '<div style="height:var(--space-24)"></div>' +
@@ -844,10 +862,14 @@
 
   // ── Router ──
   function parseRoute() {
-    const hash = location.hash.replace(/^#/, '') || '/';
-    const parts = hash.split('/').filter(Boolean); // e.g. ['tool','charter']
-    if (parts.length === 0) return { view: 'index' };
-    if (parts[0] === 'tool' && parts[1]) return { view: 'detail', id: parts[1] };
+    const path = (location.pathname || '/').replace(/\/+$/, '') || '/';
+    if (path === '/') return { view: 'index' };
+    const parts = path.split('/').filter(Boolean); // e.g. ['tools','content-brief']
+    if (parts[0] === 'tools' && parts[1]) {
+      const t = BY_SLUG[parts[1]];
+      return t ? { view: 'detail', id: t.id } : { view: 'index' };
+    }
+    if (parts[0] === 'categories' && parts[1]) return { view: 'index', filter: parts[1] };
     if (parts[0] === 'recommend') return { view: 'recommend' };
     if (parts[0] === 'submit') return { view: 'submit' };
     if (parts[0] === 'about') return { view: 'about' };
@@ -859,6 +881,10 @@
 
   function render(scrollTop) {
     const route = parseRoute();
+    // Category deep-links (/categories/<key>/) render the index filtered to that category.
+    if (route.view === 'index' && route.filter && CAT_KEYS.has(route.filter)) {
+      state.activeFilter = route.filter;
+    }
     const app = document.getElementById('app');
     let html;
     switch (route.view) {
@@ -873,6 +899,10 @@
     }
     app.innerHTML = html;
     document.title = pageTitle(route);
+    // Hydration: drop the prerendered static shell once the app has painted the
+    // matching route, so crawlers keep the server HTML but users see no duplicate.
+    const pre = document.getElementById('prerender');
+    if (pre) pre.remove();
     if (scrollTop) window.scrollTo(0, 0);
   }
 
@@ -1024,18 +1054,43 @@
     const tag = e.target.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
     const idx = TOOLS.findIndex((t) => t.id === route.id);
-    if (e.key === 'ArrowLeft' && idx > 0) location.hash = '#/tool/' + TOOLS[idx - 1].id;
-    if (e.key === 'ArrowRight' && idx < TOOLS.length - 1) location.hash = '#/tool/' + TOOLS[idx + 1].id;
+    if (e.key === 'ArrowLeft' && idx > 0) navTo(toolPath(TOOLS[idx - 1]));
+    if (e.key === 'ArrowRight' && idx < TOOLS.length - 1) navTo(toolPath(TOOLS[idx + 1]));
   });
 
-  // route changes: a fresh navigation to recommend/submit starts those flows over
-  window.addEventListener('hashchange', () => {
-    const route = parseRoute();
-    if (route.view === 'recommend') { state.wizardStep = 0; state.wizardAnswers = []; }
-    if (route.view === 'submit') { state.submitSent = false; state.submitError = ''; state.submitSending = false; }
-    render(true);
+  // ── Intercept internal link clicks → History API navigation (no full reload) ──
+  document.addEventListener('click', (e) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const a = e.target.closest('a');
+    if (!a) return;
+    const href = a.getAttribute('href');
+    // Only same-origin, root-relative, non-new-tab links are handled in-app.
+    if (!href || href[0] !== '/' || href.startsWith('//')) return;
+    if (a.target === '_blank' || a.hasAttribute('download')) return;
+    e.preventDefault();
+    const navEl = document.querySelector('.nav');
+    if (navEl) navEl.classList.remove('is-open');
+    // Fresh navigation to recommend/submit restarts those flows.
+    if (href === '/recommend/') { state.wizardStep = 0; state.wizardAnswers = []; }
+    if (href === '/submit/') { state.submitSent = false; state.submitError = ''; state.submitSending = false; }
+    navTo(href);
   });
 
-  // initial paint
+  // Back/forward buttons.
+  window.addEventListener('popstate', () => { render(true); });
+
+  // ── Preserve old shared links: map #/… hash routes to the new real paths. ──
+  (function migrateHashRoute() {
+    const h = location.hash;
+    if (!h || h.length < 2) return;
+    const parts = h.replace(/^#/, '').split('/').filter(Boolean);
+    let path = null;
+    if (parts.length === 0) path = '/';
+    else if (parts[0] === 'tool' && parts[1] && BY_ID[parts[1]]) path = toolPath(parts[1]);
+    else if (['terminology', 'recommend', 'submit', 'about', 'faq', 'workspace'].indexOf(parts[0]) >= 0) path = '/' + parts[0] + '/';
+    if (path) history.replaceState(null, '', path);
+  })();
+
+  // initial paint (hydrates over the prerendered shell if present)
   render(false);
 })();

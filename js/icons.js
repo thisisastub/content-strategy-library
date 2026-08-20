@@ -8,6 +8,16 @@
   }
 
   const ICONS = {
+    quad: w('<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none"/>'),
+    taya: w('<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/><path d="M9.8 9.2a2.4 2.4 0 0 1 4.7.8c0 1.6-2.4 2.2-2.4 2.2"/><circle cx="12" cy="15.6" r=".75" fill="currentColor" stroke="none"/>'),
+    rot: w('<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>'),
+    maturity: w('<path d="M2 21h4v-4h4v-4h4V9h4V5h4"/>'),
+    stdc: w('<polyline points="3 7 7.5 12 3 17"/><polyline points="8.5 7 13 12 8.5 17"/><polyline points="14 7 18.5 12 14 17"/><circle cx="21" cy="12" r="1.2" fill="currentColor" stroke="none"/>'),
+    archetypes: w('<path d="M5 3.5c2.2.8 4.5 1.2 7 1.2s4.8-.4 7-1.2V11c0 5.3-3.1 9.5-7 9.5S5 16.3 5 11z"/><circle cx="9" cy="10.5" r=".75" fill="currentColor" stroke="none"/><circle cx="15" cy="10.5" r=".75" fill="currentColor" stroke="none"/><path d="M9 14.5c.8 1 1.8 1.5 3 1.5s2.2-.5 3-1.5"/>'),
+    peso: w('<circle cx="7.5" cy="7.5" r="4.5"/><circle cx="16.5" cy="7.5" r="4.5"/><circle cx="7.5" cy="16.5" r="4.5"/><circle cx="16.5" cy="16.5" r="4.5"/>'),
+    herohubhelp: w('<path d="M12 3 21 20H3z"/><line x1="8.2" y1="13" x2="15.8" y2="13"/><line x1="6" y1="16.5" x2="18" y2="16.5"/>'),
+    coremodel: w('<circle cx="12" cy="12" r="3.5"/><line x1="2" y1="12" x2="7" y2="12"/><polyline points="5 9.5 7.5 12 5 14.5"/><line x1="15.5" y1="12" x2="20.5" y2="12"/><polyline points="19.5 9.5 22 12 19.5 14.5"/>'),
+    contentdesign: w('<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/>'),
     charter:      w('<circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/>'),
     mission:      w('<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>'),
     pillars:      w('<rect x="3" y="5" width="4" height="14" rx="1"/><rect x="10" y="5" width="4" height="14" rx="1"/><rect x="17" y="5" width="4" height="14" rx="1"/><line x1="2" y1="21" x2="22" y2="21"/>'),
@@ -184,6 +194,81 @@
         return html + '</div>';
       }
       return wrap('<div class="dgm-sitemap">' + node(tree, 0) + '</div>');
+    },
+
+    quad() {
+      const S = 'background:var(--bg-surface);border:1px solid var(--border);border-radius:6px;padding:14px 16px';
+      const qcard = (n, d) => '<div style="' + S + '"><div style="font-weight:700;font-size:13px;color:var(--text-primary);font-family:var(--font-sans);margin-bottom:5px">' + n + '</div><div style="font-size:11px;color:var(--text-muted);font-family:var(--font-sans);line-height:1.5">' + d + '</div></div>';
+      const hemi = (l) => '<div style="text-align:center;font-family:var(--font-sans);font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted)">' + l + '</div>';
+      return wrap(
+        '<div>' +
+        '<div style="text-align:center;font-family:var(--font-sans);font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px">The Brain Traffic quad, 2018 revision</div>' +
+        '<div style="display:flex;flex-direction:column;gap:10px">' +
+          hemi('Content design') +
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' + qcard('Editorial strategy', 'Mission, audiences, point of view, voice and tone, standards') + qcard('Experience design', 'User needs, journeys, ecosystem, formats, design patterns') + '</div>' +
+          '<div style="display:flex;justify-content:center"><div style="background:var(--highlight);color:var(--text-primary);border-radius:6px;padding:9px 22px;font-weight:700;font-size:13px;font-family:var(--font-sans)">Core strategy</div></div>' +
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' + qcard('Structure', 'Content engineering: organization, tags, models, reuse') + qcard('Process design', 'Lifecycle, tools, accountability, who says no') + '</div>' +
+          hemi('Systems design') +
+        '</div>' +
+        '<div style="display:flex;align-items:flex-start;gap:10px;margin-top:16px;padding-top:14px;border-top:1px dashed var(--border)"><span style="font-size:15px;color:var(--text-primary);line-height:1.2;flex-shrink:0">&#8595;</span><span style="font-size:12px;color:var(--text-muted);font-family:var(--font-sans);line-height:1.55">Rotated on purpose: systems design sits underneath as the foundation that content design stands on.</span></div>' +
+        '</div>'
+      );
+    },
+
+    archetypes() {
+      const groups = [['Independence', ['Innocent', 'Explorer', 'Sage']], ['Mastery', ['Hero', 'Outlaw', 'Magician']], ['Belonging', ['Regular Guy/Gal', 'Lover', 'Jester']], ['Stability', ['Caregiver', 'Creator', 'Ruler']]];
+      const col = (g) => '<div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:6px;padding:14px 12px">' +
+        '<div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);font-family:var(--font-sans);text-align:center;margin-bottom:10px">' + g[0] + '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:6px">' + g[1].map((nm) => '<div style="background:var(--bg-subtle);border-radius:6px;padding:7px 6px;text-align:center;font-weight:600;font-size:12px;color:var(--text-primary);font-family:var(--font-sans);white-space:nowrap">' + esc(nm) + '</div>').join('') + '</div></div>';
+      return wrap('<div><div style="text-align:center;font-family:var(--font-sans);font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px">Twelve archetypes, four core motivations</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">' + groups.map(col).join('') + '</div></div>');
+    },
+
+    model() {
+      const cats = [['Guides', ['Beginner', 'Advanced']], ['Products', ['Hardware', 'Software']], ['People', ['Authors', 'Customers']]];
+      const chip = (txt, kind) => {
+        const bg = kind === 'root' ? 'var(--highlight)' : kind === 'cat' ? 'var(--bg-surface)' : 'var(--bg-subtle)';
+        const bd = kind === 'root' ? 'none' : '1px solid var(--border)';
+        const pad = kind === 'root' ? '10px 22px' : '7px 14px';
+        const fsz = kind === 'root' ? '14px' : '12px';
+        const fw = kind === 'term' ? 500 : 700;
+        return '<div style="background:' + bg + ';border:' + bd + ';border-radius:6px;padding:' + pad + ';font-size:' + fsz + ';font-weight:' + fw + ';font-family:var(--font-sans);color:var(--text-primary);white-space:nowrap">' + txt + '</div>';
+      };
+      return wrap('<div style="display:flex;flex-direction:column;align-items:center;gap:10px">' +
+        '<div style="font-family:var(--font-sans);font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted)">A simple content taxonomy</div>' +
+        chip('Content', 'root') +
+        '<div style="width:2px;height:16px;background:var(--ink-200)"></div>' +
+        '<div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;justify-content:center">' +
+        cats.map((c) => '<div style="display:flex;flex-direction:column;align-items:center;gap:8px">' + chip(c[0], 'cat') + '<div style="width:2px;height:12px;background:var(--border)"></div><div style="display:flex;flex-direction:column;gap:6px">' + c[1].map((t) => chip(t, 'term')).join('') + '</div></div>').join('') +
+        '</div></div>');
+    },
+
+    backlog() {
+      const ico = (paths) => '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' + paths.map((d) => '<path d="' + d + '"/>').join('') + '</svg>';
+      const cell = (label, bg, paths) => {
+        const bd = (bg === 'var(--bg-surface)' || bg === 'var(--bg-subtle)') ? '1px solid var(--border)' : 'none';
+        return '<div style="background:' + bg + ';border:' + bd + ';border-radius:6px;min-height:92px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:10px">' + ico(paths) + '<div style="font-size:11px;font-weight:700;font-family:var(--font-sans);color:var(--text-primary)">' + label + '</div></div>';
+      };
+      return wrap('<div style="display:flex;gap:10px;align-items:stretch">' +
+        '<div style="display:flex;align-items:center;justify-content:center"><div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);font-family:var(--font-sans)">Impact &#8594;</div></div>' +
+        '<div style="flex:1">' +
+          '<div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:8px">' +
+            cell('Quick wins', 'var(--highlight)', ['M5 13l4 4L19 7']) +
+            cell('Big bets', 'var(--bg-surface)', ['M12 2l2.9 6.3 6.8.8-5 4.6 1.3 6.8L12 22l-6.3-3.4 1.3-6.8-5-4.6 6.8-.8z']) +
+            cell('Fill-ins', 'var(--bg-subtle)', ['M12 5v14', 'M5 12h14']) +
+            cell('Avoid', 'var(--bg-subtle)', ['M12 7v5l3 2', 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z']) +
+          '</div>' +
+          '<div style="text-align:center;margin-top:8px"><span style="font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);font-family:var(--font-sans)">Effort &#8594;</span></div>' +
+        '</div></div>');
+    },
+
+    repurposing() {
+      const doc = '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>';
+      const small = [['Clip', ['M8 5v14l11-7z']], ['Post', ['M4 5h16v14H4z', 'M4 9h16']], ['Quote', ['M7 7h4v6H7z', 'M13 7h4v6h-4z']], ['Email', ['M4 6h16v12H4z', 'M4 7l8 6 8-6']], ['Thread', ['M4 6h16', 'M4 12h16', 'M4 18h10']], ['Carousel', ['M7 5h10v14H7z', 'M3 8v8', 'M21 8v8']]];
+      const chip = (g) => '<div style="display:flex;flex-direction:column;align-items:center;gap:5px;background:var(--bg-surface);border:1px solid var(--border);border-radius:6px;padding:10px 6px;min-width:66px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' + g[1].map((d) => '<path d="' + d + '"/>').join('') + '</svg><div style="font-size:10px;font-weight:600;font-family:var(--font-sans);color:var(--text-muted)">' + g[0] + '</div></div>';
+      return wrap('<div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;justify-content:center">' +
+        '<div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="background:var(--highlight);border-radius:6px;padding:18px 22px">' + doc + '</div><div style="font-size:11px;font-weight:700;font-family:var(--font-sans);color:var(--text-primary)">One pillar asset</div></div>' +
+        '<div style="font-size:22px;color:var(--text-muted)">&#8594;</div>' +
+        '<div style="display:grid;grid-template-columns:repeat(3,auto);gap:8px">' + small.map(chip).join('') + '</div></div>');
     }
   };
 

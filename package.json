@@ -1,0 +1,13 @@
+{
+  "name": "content-strategy-library",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A working reference for the frameworks content strategists actually use.",
+  "homepage": "https://contentstrategylibrary.com",
+  "scripts": {
+    "build": "node build.js",
+    "build:home": "node build.js --home",
+    "serve": "npx -y serve -l 4321 ."
+  },
+  "license": "CC0-1.0"
+}

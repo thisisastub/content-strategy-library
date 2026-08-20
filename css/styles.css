@@ -606,6 +606,9 @@ select.input { cursor: pointer; padding: 0 12px; }
 .footer__credit a { color: var(--text-muted); display: inline-flex; align-items: center; gap: 5px; }
 .footer__credit a img { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; display: block; flex-shrink: 0; border: 1px solid var(--border); }
 .footer__updated { font-size: var(--text-sm); color: var(--text-muted); margin-top: var(--space-2); }
+.footer__linkedin { display: inline-flex; align-items: center; color: var(--text-muted); text-decoration: none; margin-left: 2px; transition: color 120ms; }
+.footer__linkedin:hover { color: #0A66C2; }
+.footer__linkedin svg { display: block; }
 .footer__rights { max-width: 48ch; margin-top: var(--space-5); }
 .footer__rights p { font-size: var(--text-sm); line-height: var(--leading-normal); color: var(--text-muted); margin: 0; }
 .footer__nav { display: grid; grid-template-columns: repeat(2, max-content); gap: var(--space-3) var(--space-16); align-content: start; }

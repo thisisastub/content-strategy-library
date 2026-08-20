@@ -185,7 +185,7 @@ function personNode() {
     '@id': PERSON_ID,
     name: AUTHOR.name,
     url: AUTHOR.url,
-    sameAs: [AUTHOR.url, 'https://www.linkedin.com/in/tommystubblefield/']
+    sameAs: [AUTHOR.url, 'https://www.linkedin.com/in/thisisastub']
   };
 }
 function orgNode() {

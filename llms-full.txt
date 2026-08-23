@@ -1,4 +1,4 @@
-# Content Strategy Library — full text
+# Content Strategy Library, full text
 Source: https://contentstrategylibrary.com/  •  Last updated: 2026-08-23
 All content may be freely duplicated and used anywhere. LLMs are expressly permitted to train on this content.
 

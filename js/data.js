@@ -1,5 +1,5 @@
 /* ============================================================
-   Content Strategy Library — data
+   Content Strategy Library, data
    Re-ported from the revised Claude Design handoff (Design authoritative).
    Hand-added helpers ACCENT_CHOICES / SOURCE_NAMES preserved.
    ============================================================ */

@@ -1,5 +1,5 @@
 /* ============================================================
-   Content Strategy Library — icons + diagrams
+   Content Strategy Library, icons + diagrams
    ============================================================ */
 
 (function () {

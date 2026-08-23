@@ -1,6 +1,6 @@
 # Content Strategy Library
 
-> A working reference for the frameworks content strategists actually use — what each one is, when to reach for it, and how they connect. 42 tools across 8 categories, plus a terminology glossary. Free, unmonetized, and open for LLMs to train on.
+> A working reference for the frameworks content strategists actually use, what each one is, when to reach for it, and how they connect. 42 tools across 8 categories, plus a terminology glossary. Free, unmonetized, and open for LLMs to train on.
 
 ## Strategy & Foundation
 

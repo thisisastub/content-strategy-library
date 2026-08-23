@@ -1,5 +1,5 @@
 /* ============================================================
-   Content Strategy Library — app (routing + views)
+   Content Strategy Library, app (routing + views)
    ============================================================ */
 
 (function () {
@@ -27,7 +27,7 @@
   // Bump this when the library's content is updated.
   // Auto-stamped by build.js on every build (see stampLastUpdated). Manual edits
   // here are overwritten on the next `node build.js`.
-  const LAST_UPDATED = 'August 23, 2026';
+  const LAST_UPDATED = 'August 23, 2026 at 2:24 PM';
 
   // Web3Forms endpoint for the "Submit a Tool" form. The access key is public by design
   // (Web3Forms routes it to the maintainer's inbox and handles spam filtering server-side).
@@ -43,6 +43,10 @@
     submitSending: false,
     submitError: '',
     submitForm: { name: '', desc: '', purpose: '', cat: '', links: ['', '', ''] },
+    contactForm: { name: '', email: '', message: '' },
+    contactSent: false,
+    contactSending: false,
+    contactError: '',
     // Workspace (persisted to localStorage)
     wsTools: [],
     brand: { org: '', preparedBy: '', preparedFor: '', success: '', accent: '#F7C531' },
@@ -141,7 +145,7 @@
     const tools = state.wsTools.map((id) => BY_ID[id]).filter(Boolean).map((t) => ({
       name: t.name, category: t.category, tagline: t.tagline || '',
       summary: t.summary || '', whenToUse: t.whenToUse || [],
-      links: (t.links || []).map((l) => l.label + ' — ' + l.url)
+      links: (t.links || []).map((l) => l.label + ', ' + l.url)
     }));
     const b = state.brand || {};
     const accent = b.accent || '#F7C531';
@@ -642,6 +646,71 @@
     );
   }
 
+  // ── CONTACT ── (mirrors the Submit a Tool form; same chrome + styling)
+  function viewContact() {
+    if (state.contactSent) {
+      return shell(
+        '<div class="shell-md"><div class="submit-success">' +
+          '<div class="submit-success__check">&#10003;</div>' +
+          '<h1>Message sent</h1>' +
+          '<p>Thanks for reaching out. Your message has been emailed to the maintainer, who will reply to the address you gave.</p>' +
+          '<button class="btn btn--md btn--secondary" data-action="contact-reset">Send another message</button>' +
+        '</div></div>'
+      );
+    }
+    const f = state.contactForm;
+    const disabled = state.contactSending || !(f.name.trim() && f.email.trim() && f.message.trim());
+    return shell(
+      '<div class="shell-md">' +
+        '<header class="wizard-header dashed-b">' +
+          '<div class="detail-badge-row"><span class="badge badge--default">Contact</span></div>' +
+          '<h1 class="wizard-question">Contact</h1>' +
+          '<p class="wizard-subtitle">Questions, corrections, a tool worth adding, or a privacy request? Send a note below.</p>' +
+        '</header>' +
+        '<div class="form-stack">' +
+          '<div><label class="field-label">Your name <span class="req">*</span></label>' +
+            '<input class="input" data-cform="name" value="' + esc(f.name) + '" placeholder="Your name"></div>' +
+          '<div><label class="field-label">Your email <span class="req">*</span></label>' +
+            '<input class="input" type="email" data-cform="email" value="' + esc(f.email) + '" placeholder="you@example.com"></div>' +
+          '<div><label class="field-label">Message <span class="req">*</span></label>' +
+            '<textarea class="input" data-cform="message" rows="6" placeholder="How can I help?">' + esc(f.message) + '</textarea></div>' +
+          '<div class="submit-foot">' +
+            '<button class="btn btn--lg btn--highlight" data-action="contact-send"' + (disabled ? ' disabled' : '') + '>' + (state.contactSending ? 'Sending&hellip;' : 'Send message') + '</button>' +
+            (state.contactError ? '<p class="submit-error">' + esc(state.contactError) + '</p>' : '<p>Your message is emailed straight to the library maintainer. See the <a href="/privacy/" class="csl-body-link">privacy page</a> for details.</p>') +
+          '</div>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  // ── PRIVACY ── (same chrome; mirrors the prerendered /privacy/ content)
+  function viewPrivacy() {
+    const sect = (label, inner) => '<section class="section" style="padding:var(--space-8) 0;border-bottom:1px dashed var(--border-strong)">' +
+      '<h2 class="section-label" style="margin-bottom:var(--space-4)">' + label + '</h2>' + inner + '</section>';
+    const p = (s) => '<p class="prose-body" style="margin-bottom:var(--space-3)">' + s + '</p>';
+    const li = (s) => '<li style="margin:var(--space-2) 0;color:var(--text-secondary)">' + s + '</li>';
+    return shell(
+      '<div class="shell-md">' +
+        '<header class="wizard-header dashed-b">' +
+          '<div class="detail-badge-row"><span class="badge badge--highlight">Privacy</span></div>' +
+          '<h1 class="detail-title" style="font-size:var(--text-4xl);margin-bottom:var(--space-5)">Privacy &amp; data</h1>' +
+          '<p class="about-lede">This site is a free, unmonetized reference. There are no ads, and your data is never sold or shared. The only visitor data collected is anonymous usage analytics, and only if you consent.</p>' +
+        '</header>' +
+        sect('Who runs this site', p('The Content Strategy Library is run by Tommy Stubblefield. To exercise any of the rights below, or ask anything about your data, please use the <a class="csl-body-link" href="/contact/">contact form</a>, no email address is published here to keep spam down.')) +
+        sect('What is collected, and when',
+          p('If you click <strong>Accept</strong> on the cookie banner, the site uses <strong>Google Analytics 4</strong> to understand how the library is used. Until you accept, Google Analytics runs in a cookieless mode that sets <strong>no cookie</strong> and stores nothing on your device. If you click <strong>Reject</strong>, it stays that way permanently.') +
+          p('When enabled, Google Analytics may process: pages you view, approximate location (country/region), your device and browser type, and the site that referred you. Google Analytics 4 <strong>does not store your full IP address</strong>. The site sets no advertising cookies and does no cross-site tracking.')) +
+        sect('Legal basis', p('For visitors in the EU/UK and similar regions, the legal basis for analytics cookies is your <strong>consent</strong>, which you can withdraw at any time. Essential, first-party functionality, remembering your cookie choice and anything you save in the Workspace, is stored locally in your browser, is not tracking, and is never sent to us.')) +
+        sect('Cookies used', '<ul>' + li('<strong>_ga, _ga_*</strong> (Google Analytics), distinguish anonymous visitors and sessions. Set only after you Accept; last up to ~13 months.') + li('<strong>Local storage</strong> (first-party, functional), your cookie choice and Workspace items. Never leaves your browser.') + '</ul>') +
+        sect('Who your data is shared with', p('Analytics data is processed by <strong>Google</strong> as a data processor on our behalf. Google may process it in the United States under its standard data-transfer safeguards (the EU-US Data Privacy Framework and Standard Contractual Clauses). Data is retained according to the Google Analytics retention setting for this property.')) +
+        sect('The forms on this site', p('If you use the <a class="csl-body-link" href="/contact/">contact form</a> or the Submit a Tool form, what you type (including any email you provide so we can reply) is sent to the site owner&rsquo;s inbox via <strong>Web3Forms</strong>, a form-delivery service. It is used only to respond to you and is not added to any marketing list.')) +
+        sect('Your rights', p('You can request access to, correction of, or deletion of your data; object to or restrict processing; and withdraw consent at any time. You also have the right to complain to your local data protection authority. Use the <a class="csl-body-link" href="/contact/">contact form</a> to make a request.')) +
+        sect('How to withdraw consent or opt out', '<ul>' + li('Use the <strong>Cookie preferences</strong> link in the footer of any page to change your choice.') + li('Clear cookies / site data in your browser settings.') + li('Install Google&rsquo;s <a class="csl-body-link" href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="nofollow noopener">Analytics opt-out browser add-on</a>.') + '</ul>') +
+        '<section style="padding:var(--space-8) 0 var(--space-24)"><p class="prose-body" style="color:var(--text-muted)">Last updated ' + LAST_UPDATED + '.</p></section>' +
+      '</div>'
+    );
+  }
+
   // ── FAQ ──
   function viewFaq() {
     const items = window.FAQ_ITEMS.map((item, i) => {
@@ -819,7 +888,7 @@
           '<p style="font-family:var(--font-sans);font-size:var(--text-sm);color:var(--text-muted);margin:0 0 var(--space-6);max-width:60ch">Define what success looks like for this program, then personalize the cover for your company, agency, or client. Leave anything blank to fall back to the library defaults.</p>' +
           '<div style="margin-bottom:var(--space-8);max-width:760px">' +
             '<label class="field-label">What does success look like?</label>' +
-            '<p style="font-family:var(--font-sans);font-size:var(--text-sm);color:var(--text-muted);margin:0 0 var(--space-3);line-height:var(--leading-normal)">The outcome this set of tools is meant to drive. State it as a business result, not a content metric — this leads your exported cover.</p>' +
+            '<p style="font-family:var(--font-sans);font-size:var(--text-sm);color:var(--text-muted);margin:0 0 var(--space-3);line-height:var(--leading-normal)">The outcome this set of tools is meant to drive. State it as a business result, not a content metric, this leads your exported cover.</p>' +
             '<textarea class="input" data-form="brand-success" rows="3" placeholder="e.g. Shorten the sales cycle by giving prospects the content they need at each stage, measured by a 15% lift in pipeline velocity within two quarters.">' + esc(b.success || '') + '</textarea>' +
           '</div>' +
           '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:var(--space-5);margin-bottom:var(--space-6)">' +
@@ -883,16 +952,13 @@
     if (parts[0] === 'faq') return { view: 'faq' };
     if (parts[0] === 'terminology') return { view: 'terminology' };
     if (parts[0] === 'workspace') return { view: 'workspace' };
-    // Static prerendered pages the SPA does not own — leave their server HTML intact.
-    if (parts[0] === 'privacy' || parts[0] === 'contact') return { view: 'static' };
+    if (parts[0] === 'privacy') return { view: 'privacy' };
+    if (parts[0] === 'contact') return { view: 'contact' };
     return { view: 'index' };
   }
 
   function render(scrollTop) {
     const route = parseRoute();
-    // Static pages (privacy/contact) are fully prerendered and have no SPA view;
-    // don't touch #app or the prerendered shell.
-    if (route.view === 'static') return;
     // Category deep-links (/categories/<key>/) render the index filtered to that category.
     if (route.view === 'index' && route.filter && CAT_KEYS.has(route.filter)) {
       state.activeFilter = route.filter;
@@ -907,6 +973,8 @@
       case 'faq':        html = viewFaq(); break;
       case 'terminology': html = viewTerminology(); break;
       case 'workspace':  html = viewWorkspace(); break;
+      case 'privacy':    html = viewPrivacy(); break;
+      case 'contact':    html = viewContact(); break;
       default:           html = viewIndex();
     }
     app.innerHTML = html;
@@ -920,7 +988,7 @@
 
   function pageTitle(route) {
     if (route.view === 'detail' && BY_ID[route.id]) return BY_ID[route.id].name + ' · Content Strategy Library';
-    const map = { recommend: 'Tool Recommender', submit: 'Submit a Tool', about: 'About', faq: 'FAQ', terminology: 'Terminology', workspace: 'Workspace' };
+    const map = { recommend: 'Tool Recommender', submit: 'Submit a Tool', about: 'About', faq: 'FAQ', terminology: 'Terminology', workspace: 'Workspace', privacy: 'Privacy & data', contact: 'Contact' };
     return (map[route.view] ? map[route.view] + ' · ' : '') + 'Content Strategy Library';
   }
 
@@ -966,6 +1034,14 @@
       state.submitSending = false;
       state.submitForm = { name: '', desc: '', purpose: '', cat: '', links: ['', '', ''] };
       render(true);
+    } else if (action === 'contact-send') {
+      handleContact();
+    } else if (action === 'contact-reset') {
+      state.contactSent = false;
+      state.contactError = '';
+      state.contactSending = false;
+      state.contactForm = { name: '', email: '', message: '' };
+      render(true);
     } else if (action === 'gloss-jump') {
       const target = document.getElementById('gloss-' + el.getAttribute('data-letter'));
       if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -993,8 +1069,16 @@
     }
   });
 
-  // form field tracking (no re-render, to preserve focus)
+  // contact form field tracking (no re-render, to preserve focus)
   document.addEventListener('input', (e) => {
+    const cel = e.target.closest('[data-cform]');
+    if (cel) {
+      state.contactForm[cel.getAttribute('data-cform')] = cel.value;
+      const cf = state.contactForm;
+      const btn = document.querySelector('[data-action="contact-send"]');
+      if (btn) btn.disabled = !(cf.name.trim() && cf.email.trim() && cf.message.trim());
+      return;
+    }
     const el = e.target.closest('[data-form]');
     if (!el) return;
     const field = el.getAttribute('data-form');
@@ -1022,7 +1106,7 @@
     const payload = {
       access_key: WEB3FORMS_ACCESS_KEY,
       subject: 'Tool Submission: ' + name,
-      from_name: 'Content Strategy Library — Submit a Tool',
+      from_name: 'Content Strategy Library, Submit a Tool',
       'Tool Name': name,
       'Description': desc,
       'Purpose': purpose || '(none)',
@@ -1053,7 +1137,48 @@
       })
       .catch(() => {
         state.submitSending = false;
-        state.submitError = 'Could not send — check your connection and try again.';
+        state.submitError = 'Could not send, check your connection and try again.';
+        render(false);
+      });
+  }
+
+  function handleContact() {
+    const { name, email, message } = state.contactForm;
+    if (!(name.trim() && email.trim() && message.trim()) || state.contactSending) return;
+
+    const payload = {
+      access_key: WEB3FORMS_ACCESS_KEY,
+      subject: 'Content Strategy Library, contact message',
+      from_name: 'Content Strategy Library, Contact',
+      name: name,
+      email: email,
+      message: message,
+      botcheck: '' // Web3Forms honeypot
+    };
+
+    state.contactSending = true;
+    state.contactError = '';
+    render(false);
+
+    fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        state.contactSending = false;
+        if (data && data.success) {
+          state.contactSent = true;
+          render(true);
+        } else {
+          state.contactError = (data && data.message) || 'Something went wrong. Please try again.';
+          render(false);
+        }
+      })
+      .catch(() => {
+        state.contactSending = false;
+        state.contactError = 'Could not send, check your connection and try again.';
         render(false);
       });
   }
@@ -1079,14 +1204,13 @@
     // Only same-origin, root-relative, non-new-tab links are handled in-app.
     if (!href || href[0] !== '/' || href.startsWith('//')) return;
     if (a.target === '_blank' || a.hasAttribute('download')) return;
-    // Static prerendered pages have no SPA view — let the browser load them fully.
-    if (href === '/privacy/' || href === '/contact/') return;
     e.preventDefault();
     const navEl = document.querySelector('.nav');
     if (navEl) navEl.classList.remove('is-open');
     // Fresh navigation to recommend/submit restarts those flows.
     if (href === '/recommend/') { state.wizardStep = 0; state.wizardAnswers = []; }
     if (href === '/submit/') { state.submitSent = false; state.submitError = ''; state.submitSending = false; }
+    if (href === '/contact/') { state.contactSent = false; state.contactError = ''; state.contactSending = false; }
     navTo(href);
   });
 

@@ -1,8 +1,8 @@
 /* ============================================================
-   Content Strategy Library — downloadable template generators
+   Content Strategy Library, downloadable template generators
    Ported verbatim (as a class) from the Claude Design handoff.
    Client-side document generation via docx, pdf-lib, xlsx (SheetJS),
-   and PptxGenJS — all loaded from CDN in index.html.
+   and PptxGenJS, all loaded from CDN in index.html.
    Public API: window.CSLTemplates.templateVals(id) and .downloadTemplate(id, fmt).
    ============================================================ */
 (function () {

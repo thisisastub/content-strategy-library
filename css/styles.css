@@ -4,7 +4,7 @@
    DESIGN TOKENS
    ============================================================ */
 :root {
-  /* ─── Ink scale — warm neutrals ──────────────── */
+  /* ─── Ink scale, warm neutrals ──────────────── */
   --ink-25:   #F8F7F2;
   --ink-50:   #F0EFE8;
   --ink-100:  #E2E1D8;
@@ -14,7 +14,7 @@
   --ink-800:  #2C2C22;
   --ink-950:  #16160E;
 
-  /* ─── Highlight — the marker ─────────────────── */
+  /* ─── Highlight, the marker ─────────────────── */
   --highlight:       #F7C531;
   --highlight-light: #FBE98C;
   --highlight-deep:  #B8920A;
@@ -449,7 +449,7 @@ a {
   border-radius: var(--radius-md);
   transition: border-color 120ms, background 120ms;
 }
-/* Only border-color on hover — the .ds-highlight-swipe gradient provides the hover fill (a
+/* Only border-color on hover, the .ds-highlight-swipe gradient provides the hover fill (a
    background: shorthand here would reset background-image and kill the swipe). */
 .link-row:hover { border-color: var(--border-strong); }
 .link-row span:first-child { flex: 1; line-height: var(--leading-snug); }
@@ -594,7 +594,7 @@ select.input { cursor: pointer; padding: 0 12px; }
 /* ============================================================
    FOOTER
    ============================================================ */
-.footer { border-top: 1px dashed var(--border-strong); flex-shrink: 0; }
+.footer { border-top: 1px dashed var(--border-strong); flex-shrink: 0; background: var(--bg-subtle); }
 .footer__inner {
   max-width: var(--content-xl); margin: 0 auto; padding: var(--space-10) var(--space-10) var(--space-16);
   display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-8); flex-wrap: wrap;
@@ -822,7 +822,7 @@ select.input { cursor: pointer; padding: 0 12px; }
 }
 
 /* ============================================================
-   PRERENDER SHELL — static HTML shown to crawlers and to no-JS
+   PRERENDER SHELL, static HTML shown to crawlers and to no-JS
    users, and briefly before the SPA hydrates over it. Kept simple
    and on-brand; the app replaces #prerender once JS runs.
    ============================================================ */
@@ -908,19 +908,19 @@ select.input { cursor: pointer; padding: 0 12px; }
   .consent-bar__actions .btn { flex: 1; }
 }
 
-/* Footer "Cookie preferences" trigger — styled like the other footer links. */
-.footer__nav .footer__cookie-prefs,
-.pr-footer-links .pr-cookie-prefs {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  font: inherit;
-  color: var(--text-secondary);
-  text-decoration: underline;
-  text-underline-offset: 2px;
+/* Footer "Cookie preferences" trigger, styled identically to the sibling footer links. */
+.footer__nav .footer__cookie-prefs {
+  background: none; border: none; padding: 0; cursor: pointer; text-align: left;
+  font-family: var(--font-sans); font-size: var(--text-base); font-weight: 500;
+  color: var(--text-secondary); text-decoration: none; line-height: var(--leading-snug);
+  white-space: nowrap; transition: color 120ms;
 }
-.footer__nav .footer__cookie-prefs:hover,
+.footer__nav .footer__cookie-prefs:hover { color: var(--text-primary); }
+.pr-footer-links .pr-cookie-prefs {
+  background: none; border: none; padding: 0; cursor: pointer;
+  font-family: var(--font-sans); font-size: var(--text-sm); font-weight: var(--weight-regular);
+  color: var(--text-secondary); text-decoration: none; transition: color 120ms;
+}
 .pr-footer-links .pr-cookie-prefs:hover { color: var(--text-primary); }
 
 /* ============================================================

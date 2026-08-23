@@ -1,5 +1,5 @@
 /* ============================================================
-   Content Strategy Library — cookie consent gate
+   Content Strategy Library, cookie consent gate
    ------------------------------------------------------------
    GA4 Consent Mode v2. On first visit the page is visible but
    dimmed and non-interactive until the visitor chooses Accept or
@@ -44,7 +44,7 @@
     wrap.setAttribute('aria-label', 'Cookie consent');
     wrap.innerHTML =
       '<div class="consent-bar__inner">' +
-        '<p class="consent-bar__text">This site uses a single Google Analytics cookie to understand how the library gets used — ' +
+        '<p class="consent-bar__text">This site uses a single Google Analytics cookie to understand how the library gets used, ' +
         'no ads, and your data is never sold or shared. Essential features (remembering this choice and your Workspace) never use tracking cookies. ' +
         '<a href="' + PRIVACY_URL + '" class="consent-bar__link">Privacy</a></p>' +
         '<div class="consent-bar__actions">' +
@@ -94,7 +94,7 @@
       if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
       else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     }
-    // Esc intentionally does nothing while gated — the visitor must choose.
+    // Esc intentionally does nothing while gated, the visitor must choose.
   }
 
   function choose(accepted) {

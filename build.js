@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /* ============================================================
-   Content Strategy Library — static prerender build
+   Content Strategy Library, static prerender build
    ------------------------------------------------------------
    Reads js/data.js (the single source of truth) and emits static,
-   crawlable HTML for every tool, category, term, and page — plus
+   crawlable HTML for every tool, category, term, and page, plus
    sitemap.xml, robots.txt, and llms.txt.
 
    The existing SPA (index.html + js/*) still hydrates on top of
@@ -21,15 +21,12 @@ const vm = require('vm');
 const ROOT = __dirname;
 const SITE = 'https://contentstrategylibrary.com';
 const AUTHOR = { name: 'Tommy Stubblefield', url: 'https://stubblefield.info' };
-const GA_MEASUREMENT_ID = 'G-HV8NC230YM'; // Google Analytics 4 (GA4) — property "ConStratLib site"
+const GA_MEASUREMENT_ID = 'G-HV8NC230YM'; // Google Analytics 4 (GA4), property "ConStratLib site"
 const WEB3FORMS_ACCESS_KEY = '2e290c09-02e0-4e55-b53f-0c238871ff5a'; // public by design; matches js/app.js
-const BUILD_DATE = process.env.CSL_BUILD_DATE || new Date().toISOString().slice(0, 10); // YYYY-MM-DD (sitemap lastmod)
 const FIRST_PUBLISHED = '2026-01-01';
-// Full ISO 8601 with timezone offset for schema.org datePublished/dateModified.
-// (Bare YYYY-MM-DD is flagged by Google's Rich Results Test as missing a timezone.)
-const isoDateTime = (ymd) => ymd + 'T00:00:00+00:00';
-const FIRST_PUBLISHED_ISO = isoDateTime(FIRST_PUBLISHED);
-const BUILD_ISO = isoDateTime(BUILD_DATE);
+const FIRST_PUBLISHED_ISO = FIRST_PUBLISHED + 'T00:00:00+00:00';
+// The build timestamp (BUILD_DATE / BUILD_ISO / LAST_UPDATED_STR) is derived below,
+// after the date helpers, and snapped to "off hours" (see offHoursStamp).
 
 /* ---------- Load data.js in a sandbox (no fork of content) ---------- */
 function loadData() {
@@ -68,6 +65,35 @@ function humanDate(ymd) {
   return MONTHS[m - 1] + ' ' + d + ', ' + y;
 }
 
+/* ---------- build timestamp (snapped to off-hours) ---------- */
+function pad2(n) { return String(n).padStart(2, '0'); }
+function ymdStr(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+function localIso(d) {
+  const o = -d.getTimezoneOffset(), s = o >= 0 ? '+' : '-';
+  return ymdStr(d) + 'T' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds()) +
+    s + pad2(Math.floor(Math.abs(o) / 60)) + ':' + pad2(Math.abs(o) % 60);
+}
+function humanDateTime(d) {
+  let h = d.getHours(); const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
+  return MONTHS[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear() + ' at ' + h + ':' + pad2(d.getMinutes()) + ' ' + ap;
+}
+// This site is a nights-and-weekends project. Never present an "updated" time during
+// weekday business hours (Mon-Fri 08:00 to 18:00 local); snap it back to 07:00 that
+// morning so the stamp always reads as off-hours (early morning, evening, or weekend).
+function offHoursStamp(d) {
+  const day = d.getDay();
+  if (day === 0 || day === 6) return d;            // weekend: any time is fine
+  const h = d.getHours();
+  if (h < 8 || h >= 18) return d;                  // already outside business hours
+  const a = new Date(d); a.setHours(7, d.getMinutes(), d.getSeconds(), 0); return a;
+}
+const STAMP = process.env.CSL_BUILD_DATE
+  ? (function () { const p = process.env.CSL_BUILD_DATE.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2], 7, 0, 0); })()
+  : offHoursStamp(new Date());
+const BUILD_DATE = ymdStr(STAMP);          // YYYY-MM-DD
+const BUILD_ISO = localIso(STAMP);         // full ISO 8601 with local offset, off-hours
+const LAST_UPDATED_STR = humanDateTime(STAMP);
+
 // Keep the SPA footer's "Last updated" line in sync with the build date, so it
 // can never go stale. Rewrites the LAST_UPDATED constant in js/app.js in place.
 function stampLastUpdated() {
@@ -75,7 +101,7 @@ function stampLastUpdated() {
   const src = fs.readFileSync(p, 'utf8');
   const next = src.replace(
     /const LAST_UPDATED = '[^']*';/,
-    "const LAST_UPDATED = '" + humanDate(BUILD_DATE) + "';"
+    "const LAST_UPDATED = '" + LAST_UPDATED_STR + "';"
   );
   if (next !== src) { fs.writeFileSync(p, next); return true; }
   return false;
@@ -98,7 +124,7 @@ function head(opts) {
     '<head>',
     '  <meta charset="utf-8">',
     '  <meta name="viewport" content="width=device-width, initial-scale=1">',
-    '  <!-- Google tag (gtag.js) — GA4 -->',
+    '  <!-- Google tag (gtag.js), GA4 -->',
     '  <script async src="https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID + '"></script>',
     '  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}' +
       'gtag("consent","default",{ad_storage:"denied",ad_user_data:"denied",ad_personalization:"denied",analytics_storage:"denied",wait_for_update:500});' +
@@ -219,7 +245,7 @@ function websiteNode() {
   };
 }
 function breadcrumbNode(items) {
-  // items: [{name, url}] — url root-relative or absolute
+  // items: [{name, url}], url root-relative or absolute
   return {
     '@type': 'BreadcrumbList',
     itemListElement: items.map((it, i) => ({
@@ -257,7 +283,7 @@ function renderToolPage(data, tool) {
   const related = (tool.related || []).map((rid) => {
     const r = byId[rid];
     if (!r) return '';
-    return '<li><a href="' + escAttr(toolUrl(r)) + '">' + esc(r.name) + '</a> — ' + esc(r.tagline) + '</li>';
+    return '<li><a href="' + escAttr(toolUrl(r)) + '">' + esc(r.name) + '</a>, ' + esc(r.tagline) + '</li>';
   }).filter(Boolean).join('\n      ');
 
   const notes = renderNotes(tool.notes);
@@ -282,7 +308,7 @@ function renderToolPage(data, tool) {
     siteFooterStatic()
   ].filter((l) => l !== '').join('\n');
 
-  const pageTitle = tool.name + ' — Content Strategy Library';
+  const pageTitle = tool.name + ', Content Strategy Library';
 
   const articleNode = {
     '@type': 'Article',
@@ -348,13 +374,13 @@ function renderNotes(notes) {
    ============================================================ */
 function renderHome(data) {
   const canonical = SITE + '/';
-  const description = 'A working reference for the frameworks content strategists actually use — what each one is, when to reach for it, and how they connect. ' +
+  const description = 'A working reference for the frameworks content strategists actually use, what each one is, when to reach for it, and how they connect. ' +
     data.TOOLS.length + ' tools across ' + data.CATEGORY_ORDER.length + ' categories.';
 
   const sections = data.CATEGORY_ORDER.map(([name, key]) => {
     const tools = data.TOOLS.filter((t) => t.cat === key);
     const items = tools.map((t) =>
-      '      <li><a href="' + escAttr(toolUrl(t)) + '">' + esc(t.name) + '</a> — ' + esc(t.tagline) + '</li>'
+      '      <li><a href="' + escAttr(toolUrl(t)) + '">' + esc(t.name) + '</a>, ' + esc(t.tagline) + '</li>'
     ).join('\n');
     return [
       '  <section class="pr-cat">',
@@ -392,7 +418,7 @@ function renderHome(data) {
   };
 
   return [
-    head({ title: 'Content Strategy Library — Tools, Frameworks & Terminology', description, canonical, ogType: 'website', jsonld: [graph([itemList], null)] }),
+    head({ title: 'Content Strategy Library, Tools, Frameworks & Terminology', description, canonical, ogType: 'website', jsonld: [graph([itemList], null)] }),
     shellOpen(),
     body,
     bootScripts()
@@ -405,11 +431,11 @@ function renderHome(data) {
 function renderCategoryPage(data, name, key) {
   const canonical = SITE + catUrl(key);
   const tools = data.TOOLS.filter((t) => t.cat === key);
-  const description = metaDescription(name + ' — ' + tools.length + ' content strategy tools: ' +
+  const description = metaDescription(name + ', ' + tools.length + ' content strategy tools: ' +
     tools.slice(0, 4).map((t) => t.name).join(', ') + '.');
 
   const items = tools.map((t) =>
-    '      <li><a href="' + escAttr(toolUrl(t)) + '">' + esc(t.name) + '</a> — ' + esc(t.tagline) + '</li>'
+    '      <li><a href="' + escAttr(toolUrl(t)) + '">' + esc(t.name) + '</a>, ' + esc(t.tagline) + '</li>'
   ).join('\n');
 
   const body = [
@@ -436,7 +462,7 @@ function renderCategoryPage(data, name, key) {
   const crumbs = [{ name: 'Library', url: '/' }, { name: name, url: catUrl(key) }];
 
   return [
-    head({ title: name + ' — Content Strategy Library', description, canonical, ogType: 'website', jsonld: [graph([itemList], crumbs)] }),
+    head({ title: name + ', Content Strategy Library', description, canonical, ogType: 'website', jsonld: [graph([itemList], crumbs)] }),
     shellOpen(), body, bootScripts()
   ].join('\n');
 }
@@ -450,12 +476,12 @@ function termSlug(term) {
 function renderTerminologyPage(data) {
   const canonical = SITE + '/terminology/';
   const description = metaDescription('Plain-English definitions of ' + data.TERMINOLOGY.length +
-    ' content strategy terms — from content audit and governance to AEO, GEO, topical authority, and KPIs.');
+    ' content strategy terms, from content audit and governance to AEO, GEO, topical authority, and KPIs.');
 
   const entries = data.TERMINOLOGY.map((tm) => {
     const id = termSlug(tm.term);
     const defs = (tm.defs || []).map((d) => {
-      const by = d.by ? ' <cite>— ' + esc(d.by) + '</cite>' : '';
+      const by = d.by ? ' <cite>, ' + esc(d.by) + '</cite>' : '';
       return '      <li>' + esc(d.text || d) + by + '</li>';
     }).join('\n');
     return [
@@ -495,7 +521,7 @@ function renderTerminologyPage(data) {
   const crumbs = [{ name: 'Library', url: '/' }, { name: 'Terminology', url: '/terminology/' }];
 
   return [
-    head({ title: 'Content Strategy Terminology — Content Strategy Library', description, canonical, jsonld: [graph([definedTermSet], crumbs)] }),
+    head({ title: 'Content Strategy Terminology, Content Strategy Library', description, canonical, jsonld: [graph([definedTermSet], crumbs)] }),
     shellOpen(), body, bootScripts()
   ].join('\n');
 }
@@ -505,7 +531,7 @@ function renderTerminologyPage(data) {
    ============================================================ */
 function renderFaqPage(data) {
   const canonical = SITE + '/faq/';
-  const description = metaDescription('Honest answers to the questions that come up most about content strategy — doing it yourself, hiring, AI, and knowing whether it is working.');
+  const description = metaDescription('Honest answers to the questions that come up most about content strategy, doing it yourself, hiring, AI, and knowing whether it is working.');
 
   const items = data.FAQ_ITEMS.map((it) =>
     '  <section class="pr-faq-item"><h2>' + esc(it.q) + '</h2><p>' + esc(it.a) + '</p></section>'
@@ -533,7 +559,7 @@ function renderFaqPage(data) {
   const crumbs = [{ name: 'Library', url: '/' }, { name: 'FAQ', url: '/faq/' }];
 
   return [
-    head({ title: 'FAQ — Content Strategy Library', description, canonical, jsonld: [graph([faqPage], crumbs)] }),
+    head({ title: 'FAQ, Content Strategy Library', description, canonical, jsonld: [graph([faqPage], crumbs)] }),
     shellOpen(), body, bootScripts()
   ].join('\n');
 }
@@ -573,7 +599,7 @@ function renderAboutPage(data) {
   const crumbs = [{ name: 'Library', url: '/' }, { name: 'About', url: '/about/' }];
 
   return [
-    head({ title: 'About — Content Strategy Library', description, canonical, jsonld: [graph([aboutNode], crumbs)] }),
+    head({ title: 'About, Content Strategy Library', description, canonical, jsonld: [graph([aboutNode], crumbs)] }),
     shellOpen(), body, bootScripts()
   ].join('\n');
 }
@@ -592,12 +618,12 @@ function renderPrivacyPage() {
     '  <nav class="pr-breadcrumb" aria-label="Breadcrumb"><a href="/">Library</a> › <span>Privacy</span></nav>',
     '  <h1>Privacy &amp; data</h1>',
     '  <p class="pr-summary">This site is a free, unmonetized reference. There are no ads, and your data is never sold or shared. ' +
-      'The only visitor data collected is anonymous usage analytics — and only if you consent.</p>',
+      'The only visitor data collected is anonymous usage analytics, and only if you consent.</p>',
 
     '  <h2>Who runs this site</h2>',
     '  <p>The Content Strategy Library is run by ' + esc(AUTHOR.name) + '. ' +
       'To exercise any of the rights below, or ask anything about your data, please use the ' +
-      '<a href="/contact/">contact form</a> — no email address is published here to keep spam down.</p>',
+      '<a href="/contact/">contact form</a>, no email address is published here to keep spam down.</p>',
 
     '  <h2>What is collected, and when</h2>',
     '  <p>If you click <strong>Accept</strong> on the cookie banner, the site uses <strong>Google Analytics 4</strong> to ' +
@@ -609,13 +635,13 @@ function renderPrivacyPage() {
 
     '  <h2>Legal basis</h2>',
     '  <p>For visitors in the EU/UK and similar regions, the legal basis for analytics cookies is your <strong>consent</strong>, ' +
-      'which you can withdraw at any time (see below). Essential, first-party functionality — remembering your cookie choice and ' +
-      'anything you save in the Workspace — is stored locally in your browser, is not tracking, and is never sent to us.</p>',
+      'which you can withdraw at any time (see below). Essential, first-party functionality, remembering your cookie choice and ' +
+      'anything you save in the Workspace, is stored locally in your browser, is not tracking, and is never sent to us.</p>',
 
     '  <h2>Cookies used</h2>',
     '  <ul>',
-    li('<strong>_ga, _ga_*</strong> (Google Analytics) — distinguish anonymous visitors and sessions. Set only after you Accept; last up to ~13 months.'),
-    li('<strong>Local storage</strong> (first-party, functional) — your cookie choice and Workspace items. Never leaves your browser.'),
+    li('<strong>_ga, _ga_*</strong> (Google Analytics), distinguish anonymous visitors and sessions. Set only after you Accept; last up to ~13 months.'),
+    li('<strong>Local storage</strong> (first-party, functional), your cookie choice and Workspace items. Never leaves your browser.'),
     '  </ul>',
 
     '  <h2>Who your data is shared with</h2>',
@@ -640,7 +666,7 @@ function renderPrivacyPage() {
     li('Install Google’s <a href="https://tools.google.com/dlpage/gaoptout" rel="nofollow noopener" target="_blank">Analytics opt-out browser add-on</a>.'),
     '  </ul>',
 
-    '  <p class="pr-legal-updated">Last updated ' + humanDate(BUILD_DATE) + '.</p>',
+    '  <p class="pr-legal-updated">Last updated ' + LAST_UPDATED_STR + '.</p>',
     '</div>',
     siteFooterStatic()
   ].join('\n');
@@ -655,28 +681,28 @@ function renderPrivacyPage() {
   };
   const crumbs = [{ name: 'Library', url: '/' }, { name: 'Privacy', url: '/privacy/' }];
   return [
-    head({ title: 'Privacy & data — Content Strategy Library', description, canonical, jsonld: [graph([node], crumbs)] }),
+    head({ title: 'Privacy & data, Content Strategy Library', description, canonical, jsonld: [graph([node], crumbs)] }),
     shellOpen(), body, bootScripts()
   ].join('\n');
 }
 
 /* ============================================================
-   PAGE: contact (Web3Forms — no email address exposed)
+   PAGE: contact (Web3Forms, no email address exposed)
    ============================================================ */
 function renderContactPage() {
   const canonical = SITE + '/contact/';
-  const description = metaDescription('Contact the Content Strategy Library — questions, corrections, tool suggestions, or privacy/data requests. Goes straight to the maintainer.');
+  const description = metaDescription('Contact the Content Strategy Library, questions, corrections, tool suggestions, or privacy/data requests. Goes straight to the maintainer.');
 
   const body = [
     siteHeaderStatic(),
     '<div class="pr-legal pr-contact">',
     '  <nav class="pr-breadcrumb" aria-label="Breadcrumb"><a href="/">Library</a> › <span>Contact</span></nav>',
     '  <h1>Contact</h1>',
-    '  <p class="pr-summary">Questions, corrections, a tool worth adding, or a privacy/data request? Send a note below — ' +
+    '  <p class="pr-summary">Questions, corrections, a tool worth adding, or a privacy/data request? Send a note below, ' +
       'it goes straight to the maintainer’s inbox.</p>',
     '  <form class="pr-form" action="https://api.web3forms.com/submit" method="POST">',
     '    <input type="hidden" name="access_key" value="' + WEB3FORMS_ACCESS_KEY + '">',
-    '    <input type="hidden" name="subject" value="Content Strategy Library — contact message">',
+    '    <input type="hidden" name="subject" value="Content Strategy Library, contact message">',
     '    <input type="hidden" name="from_name" value="Content Strategy Library">',
     '    <input type="checkbox" name="botcheck" class="pr-hp" style="display:none" tabindex="-1" autocomplete="off">',
     '    <label class="pr-field"><span>Your name</span><input type="text" name="name" required></label>',
@@ -699,14 +725,14 @@ function renderContactPage() {
   };
   const crumbs = [{ name: 'Library', url: '/' }, { name: 'Contact', url: '/contact/' }];
   return [
-    head({ title: 'Contact — Content Strategy Library', description, canonical, jsonld: [graph([node], crumbs)] }),
+    head({ title: 'Contact, Content Strategy Library', description, canonical, jsonld: [graph([node], crumbs)] }),
     shellOpen(), body, bootScripts()
   ].join('\n');
 }
 
 /* ============================================================
-   PAGE: app-only shells (recommend / submit / workspace) — noindex
-   404 fallback — noindex, boots the SPA which resolves the route.
+   PAGE: app-only shells (recommend / submit / workspace), noindex
+   404 fallback, noindex, boots the SPA which resolves the route.
    ============================================================ */
 function renderAppShell(opts) {
   // opts: { title, description, canonical, robots }
@@ -743,7 +769,7 @@ function buildSitemap(data) {
   add('/contact/', '0.4');
   add('/privacy/', '0.3');
   const body = urls.map((u) =>
-    '  <url><loc>' + u.loc + '</loc><lastmod>' + BUILD_DATE + '</lastmod>' +
+    '  <url><loc>' + u.loc + '</loc><lastmod>' + BUILD_ISO + '</lastmod>' +
     '<changefreq>monthly</changefreq><priority>' + u.priority + '</priority></url>'
   ).join('\n');
   return '<?xml version="1.0" encoding="UTF-8"?>\n' +
@@ -777,7 +803,7 @@ function buildLlmsTxt(data) {
   const lines = [];
   lines.push('# Content Strategy Library');
   lines.push('');
-  lines.push('> A working reference for the frameworks content strategists actually use — ' +
+  lines.push('> A working reference for the frameworks content strategists actually use, ' +
     'what each one is, when to reach for it, and how they connect. ' +
     data.TOOLS.length + ' tools across ' + data.CATEGORY_ORDER.length + ' categories, plus a terminology glossary. ' +
     'Free, unmonetized, and open for LLMs to train on.');
@@ -804,7 +830,7 @@ function buildLlmsTxt(data) {
 
 function buildLlmsFull(data) {
   const out = [];
-  out.push('# Content Strategy Library — full text');
+  out.push('# Content Strategy Library, full text');
   out.push('Source: ' + SITE + '/  •  Last updated: ' + BUILD_DATE);
   out.push('All content may be freely duplicated and used anywhere. LLMs are expressly permitted to train on this content.');
   out.push('');
@@ -859,7 +885,7 @@ function build() {
 
   // Stamp the footer "Last updated" date before generating pages (so the value
   // baked into any inline references matches). app.js itself is served as-is.
-  if (stampLastUpdated()) console.log('  stamped "Last updated" → ' + humanDate(BUILD_DATE));
+  if (stampLastUpdated()) console.log('  stamped "Last updated" -> ' + LAST_UPDATED_STR);
 
   // Homepage. Overwriting root index.html replaces the SPA entry with the
   // prerendered+hydrating page. Hydration is wired, so this is safe; gated
@@ -884,26 +910,26 @@ function build() {
   w(path.join('privacy', 'index.html'), renderPrivacyPage());
   w(path.join('contact', 'index.html'), renderContactPage());
 
-  // App-only views (interactive) — noindex boot shells so deep links work + carry robots noindex
+  // App-only views (interactive), noindex boot shells so deep links work + carry robots noindex
   w(path.join('recommend', 'index.html'), renderAppShell({
-    title: 'Tool Recommender — Content Strategy Library', h1: 'Tool Recommender',
+    title: 'Tool Recommender, Content Strategy Library', h1: 'Tool Recommender',
     description: 'Answer three questions and get a shortlist of content strategy tools to start with.',
     canonical: SITE + '/recommend/', note: 'A three-question guide to the right tools. Loading…'
   }));
   w(path.join('submit', 'index.html'), renderAppShell({
-    title: 'Submit a Tool — Content Strategy Library', h1: 'Submit a tool',
+    title: 'Submit a Tool, Content Strategy Library', h1: 'Submit a tool',
     description: 'Suggest a content strategy tool or framework to add to the library.',
     canonical: SITE + '/submit/', note: 'Suggest a tool for the library. Loading…'
   }));
   w(path.join('workspace', 'index.html'), renderAppShell({
-    title: 'Workspace — Content Strategy Library', h1: 'Workspace',
+    title: 'Workspace, Content Strategy Library', h1: 'Workspace',
     description: 'Collect tools, brand the page, and export a shareable PDF or deck.',
     canonical: SITE + '/workspace/', note: 'Collect and export a tool set. Loading…'
   }));
 
-  // 404 — noindex boot shell; GitHub Pages serves this for unmatched routes.
+  // 404, noindex boot shell; GitHub Pages serves this for unmatched routes.
   w('404.html', renderAppShell({
-    title: 'Not found — Content Strategy Library', h1: 'Page not found',
+    title: 'Not found, Content Strategy Library', h1: 'Page not found',
     description: 'That page could not be found.', canonical: SITE + '/',
     robots: 'noindex,nofollow', note: 'That page moved or never existed. Taking you to the library…'
   }));
@@ -920,7 +946,7 @@ function build() {
   // Guard: never clobber the custom-domain CNAME
   const cnamePath = path.join(ROOT, 'CNAME');
   if (!fs.existsSync(cnamePath)) {
-    console.warn('  WARNING: CNAME missing — expected contentstrategylibrary.com');
+    console.warn('  WARNING: CNAME missing, expected contentstrategylibrary.com');
   }
 
   console.log('Build complete. ' + written.length + ' files written.');

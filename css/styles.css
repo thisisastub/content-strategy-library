@@ -854,3 +854,92 @@ select.input { cursor: pointer; padding: 0 12px; }
 .prerender-shell .pr-footer-links { display: flex; flex-wrap: wrap; gap: var(--space-4); margin-bottom: var(--space-4); }
 .prerender-shell .pr-footer-links a { color: var(--text-secondary); text-decoration: none; font-size: var(--text-sm); }
 .prerender-shell .pr-footer p { font-size: var(--text-sm); color: var(--text-muted); max-width: none; }
+
+/* ============================================================
+   COOKIE CONSENT GATE
+   Dimmed, interaction-blocking on first visit; bottom bar with
+   equal-weight Accept / Reject. Injected by js/consent.js.
+   ============================================================ */
+.consent-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(22, 22, 14, 0.45);
+  z-index: 900;
+  pointer-events: auto;
+  animation: fadeUp 200ms ease both;
+}
+.consent-bar {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 950;
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-strong);
+  box-shadow: 0 -4px 24px rgba(22, 22, 14, 0.12);
+  animation: fadeUp 220ms ease both;
+}
+.consent-bar__inner {
+  max-width: var(--content-lg);
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-6);
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+.consent-bar__text {
+  margin: 0;
+  flex: 1;
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--text-secondary);
+  max-width: 80ch;
+}
+.consent-bar__link { color: var(--text-primary); font-weight: var(--weight-semibold); }
+.consent-bar__actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+/* Equal-weight buttons: same size; Accept highlighted, Reject outlined. */
+.consent-bar__actions .btn { min-width: 92px; }
+
+@media (max-width: 640px) {
+  .consent-bar__inner { flex-direction: column; align-items: stretch; gap: var(--space-3); }
+  .consent-bar__actions { justify-content: stretch; }
+  .consent-bar__actions .btn { flex: 1; }
+}
+
+/* Footer "Cookie preferences" trigger — styled like the other footer links. */
+.footer__nav .footer__cookie-prefs,
+.pr-footer-links .pr-cookie-prefs {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.footer__nav .footer__cookie-prefs:hover,
+.pr-footer-links .pr-cookie-prefs:hover { color: var(--text-primary); }
+
+/* ============================================================
+   LEGAL / CONTACT PRERENDER PAGES
+   ============================================================ */
+.prerender-shell .pr-legal h2 { font-size: var(--text-lg); margin: var(--space-8) 0 var(--space-2); }
+.prerender-shell .pr-legal ul { margin: var(--space-2) 0; }
+.prerender-shell .pr-legal-updated { font-size: var(--text-sm); color: var(--text-muted); margin-top: var(--space-8); }
+.prerender-shell .pr-form { display: flex; flex-direction: column; gap: var(--space-4); max-width: 34rem; margin-top: var(--space-6); }
+.prerender-shell .pr-field { display: flex; flex-direction: column; gap: var(--space-2); }
+.prerender-shell .pr-field span { font-size: var(--text-sm); font-weight: var(--weight-semibold); color: var(--text-primary); }
+.prerender-shell .pr-field small { font-weight: var(--weight-regular); color: var(--text-muted); }
+.prerender-shell .pr-field input,
+.prerender-shell .pr-field textarea {
+  font-family: var(--font-sans); font-size: var(--text-base); color: var(--text-primary);
+  background: var(--bg-surface); border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md); padding: 10px 12px; width: 100%;
+}
+.prerender-shell .pr-field input:focus,
+.prerender-shell .pr-field textarea:focus { outline: none; border-color: var(--ink-400); box-shadow: 0 0 0 3px rgba(247,197,49,0.28); }
+.prerender-shell .pr-form .btn { align-self: flex-start; }
+.prerender-shell .pr-hp { position: absolute; left: -9999px; }

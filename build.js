@@ -22,6 +22,7 @@ const ROOT = __dirname;
 const SITE = 'https://contentstrategylibrary.com';
 const AUTHOR = { name: 'Tommy Stubblefield', url: 'https://stubblefield.info' };
 const GA_MEASUREMENT_ID = 'G-HV8NC230YM'; // Google Analytics 4 (GA4) — property "ConStratLib site"
+const WEB3FORMS_ACCESS_KEY = '2e290c09-02e0-4e55-b53f-0c238871ff5a'; // public by design; matches js/app.js
 const BUILD_DATE = process.env.CSL_BUILD_DATE || new Date().toISOString().slice(0, 10); // YYYY-MM-DD (sitemap lastmod)
 const FIRST_PUBLISHED = '2026-01-01';
 // Full ISO 8601 with timezone offset for schema.org datePublished/dateModified.
@@ -99,7 +100,9 @@ function head(opts) {
     '  <meta name="viewport" content="width=device-width, initial-scale=1">',
     '  <!-- Google tag (gtag.js) — GA4 -->',
     '  <script async src="https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID + '"></script>',
-    '  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","' + GA_MEASUREMENT_ID + '");</script>',
+    '  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}' +
+      'gtag("consent","default",{ad_storage:"denied",ad_user_data:"denied",ad_personalization:"denied",analytics_storage:"denied",wait_for_update:500});' +
+      'gtag("js",new Date());gtag("config","' + GA_MEASUREMENT_ID + '");</script>',
     '  <title>' + esc(opts.title) + '</title>',
     '  <meta name="description" content="' + escAttr(opts.description) + '">',
     '  <meta name="robots" content="' + robots + '">',
@@ -148,6 +151,9 @@ function siteFooterStatic() {
     '    <a href="/faq/">FAQ</a>',
     '    <a href="/about/">About</a>',
     '    <a href="/recommend/">Tool Recommender</a>',
+    '    <a href="/contact/">Contact</a>',
+    '    <a href="/privacy/">Privacy</a>',
+    '    <button type="button" class="pr-cookie-prefs" onclick="openCookiePrefs()">Cookie preferences</button>',
     '  </nav>',
     '  <p>Created by <a href="' + AUTHOR.url + '" rel="author">' + AUTHOR.name + '</a>. ' +
       'All content may be freely duplicated and used anywhere, without permission. ' +
@@ -167,6 +173,7 @@ function bootScripts() {
     '<script src="/js/data.js"></script>',
     '<script src="/js/icons.js"></script>',
     '<script src="/js/templates.js"></script>',
+    '<script src="/js/consent.js" defer></script>',
     '<script src="/js/app.js"></script>',
     '</body>',
     '</html>'
@@ -572,6 +579,132 @@ function renderAboutPage(data) {
 }
 
 /* ============================================================
+   PAGE: privacy (GDPR notice)
+   ============================================================ */
+function renderPrivacyPage() {
+  const canonical = SITE + '/privacy/';
+  const description = metaDescription('How the Content Strategy Library handles data: one Google Analytics cookie (only after you consent), no ads, no data selling. Your rights and how to opt out.');
+
+  const li = (s) => '<li>' + s + '</li>';
+  const body = [
+    siteHeaderStatic(),
+    '<div class="pr-legal">',
+    '  <nav class="pr-breadcrumb" aria-label="Breadcrumb"><a href="/">Library</a> › <span>Privacy</span></nav>',
+    '  <h1>Privacy &amp; data</h1>',
+    '  <p class="pr-summary">This site is a free, unmonetized reference. There are no ads, and your data is never sold or shared. ' +
+      'The only visitor data collected is anonymous usage analytics — and only if you consent.</p>',
+
+    '  <h2>Who runs this site</h2>',
+    '  <p>The Content Strategy Library is run by ' + esc(AUTHOR.name) + '. ' +
+      'To exercise any of the rights below, or ask anything about your data, please use the ' +
+      '<a href="/contact/">contact form</a> — no email address is published here to keep spam down.</p>',
+
+    '  <h2>What is collected, and when</h2>',
+    '  <p>If you click <strong>Accept</strong> on the cookie banner, the site uses <strong>Google Analytics 4</strong> to ' +
+      'understand how the library is used. Until you accept, Google Analytics runs in a cookieless mode that sets ' +
+      '<strong>no cookie</strong> and stores nothing on your device. If you click <strong>Reject</strong>, it stays that way permanently.</p>',
+    '  <p>When enabled, Google Analytics may process: pages you view, approximate location (country/region), your device ' +
+      'and browser type, and the site that referred you. Google Analytics 4 <strong>does not store your full IP address</strong>. ' +
+      'The site sets no advertising cookies and does no cross-site tracking.</p>',
+
+    '  <h2>Legal basis</h2>',
+    '  <p>For visitors in the EU/UK and similar regions, the legal basis for analytics cookies is your <strong>consent</strong>, ' +
+      'which you can withdraw at any time (see below). Essential, first-party functionality — remembering your cookie choice and ' +
+      'anything you save in the Workspace — is stored locally in your browser, is not tracking, and is never sent to us.</p>',
+
+    '  <h2>Cookies used</h2>',
+    '  <ul>',
+    li('<strong>_ga, _ga_*</strong> (Google Analytics) — distinguish anonymous visitors and sessions. Set only after you Accept; last up to ~13 months.'),
+    li('<strong>Local storage</strong> (first-party, functional) — your cookie choice and Workspace items. Never leaves your browser.'),
+    '  </ul>',
+
+    '  <h2>Who your data is shared with</h2>',
+    '  <p>Analytics data is processed by <strong>Google</strong> as a data processor on our behalf. Google may process it in the ' +
+      'United States under its standard data-transfer safeguards (the EU-US Data Privacy Framework and Standard Contractual Clauses). ' +
+      'Data is retained according to the Google Analytics retention setting for this property.</p>',
+
+    '  <h2>The forms on this site</h2>',
+    '  <p>If you use the <a href="/contact/">contact form</a> or the “Submit a Tool” form, what you type (including any email you ' +
+      'provide so we can reply) is sent to the site owner’s inbox via <strong>Web3Forms</strong>, a form-delivery service. ' +
+      'It is used only to respond to you and is not added to any marketing list.</p>',
+
+    '  <h2>Your rights</h2>',
+    '  <p>You can request access to, correction of, or deletion of your data; object to or restrict processing; and withdraw ' +
+      'consent at any time. You also have the right to complain to your local data protection authority. Use the ' +
+      '<a href="/contact/">contact form</a> to make a request.</p>',
+
+    '  <h2>How to withdraw consent or opt out</h2>',
+    '  <ul>',
+    li('Use the <strong>“Cookie preferences”</strong> link in the footer of any page to change your choice.'),
+    li('Clear cookies / site data in your browser settings.'),
+    li('Install Google’s <a href="https://tools.google.com/dlpage/gaoptout" rel="nofollow noopener" target="_blank">Analytics opt-out browser add-on</a>.'),
+    '  </ul>',
+
+    '  <p class="pr-legal-updated">Last updated ' + humanDate(BUILD_DATE) + '.</p>',
+    '</div>',
+    siteFooterStatic()
+  ].join('\n');
+
+  const node = {
+    '@type': ['WebPage', 'PrivacyPolicy'],
+    url: canonical,
+    name: 'Privacy & data',
+    description: description,
+    publisher: { '@id': ORG_ID },
+    dateModified: BUILD_ISO
+  };
+  const crumbs = [{ name: 'Library', url: '/' }, { name: 'Privacy', url: '/privacy/' }];
+  return [
+    head({ title: 'Privacy & data — Content Strategy Library', description, canonical, jsonld: [graph([node], crumbs)] }),
+    shellOpen(), body, bootScripts()
+  ].join('\n');
+}
+
+/* ============================================================
+   PAGE: contact (Web3Forms — no email address exposed)
+   ============================================================ */
+function renderContactPage() {
+  const canonical = SITE + '/contact/';
+  const description = metaDescription('Contact the Content Strategy Library — questions, corrections, tool suggestions, or privacy/data requests. Goes straight to the maintainer.');
+
+  const body = [
+    siteHeaderStatic(),
+    '<div class="pr-legal pr-contact">',
+    '  <nav class="pr-breadcrumb" aria-label="Breadcrumb"><a href="/">Library</a> › <span>Contact</span></nav>',
+    '  <h1>Contact</h1>',
+    '  <p class="pr-summary">Questions, corrections, a tool worth adding, or a privacy/data request? Send a note below — ' +
+      'it goes straight to the maintainer’s inbox.</p>',
+    '  <form class="pr-form" action="https://api.web3forms.com/submit" method="POST">',
+    '    <input type="hidden" name="access_key" value="' + WEB3FORMS_ACCESS_KEY + '">',
+    '    <input type="hidden" name="subject" value="Content Strategy Library — contact message">',
+    '    <input type="hidden" name="from_name" value="Content Strategy Library">',
+    '    <input type="checkbox" name="botcheck" class="pr-hp" style="display:none" tabindex="-1" autocomplete="off">',
+    '    <label class="pr-field"><span>Your name</span><input type="text" name="name" required></label>',
+    '    <label class="pr-field"><span>Your email <small>(so we can reply)</small></span><input type="email" name="email" required></label>',
+    '    <label class="pr-field"><span>Message</span><textarea name="message" rows="6" required></textarea></label>',
+    '    <button type="submit" class="btn btn--md btn--highlight">Send message</button>',
+    '  </form>',
+    '  <p class="pr-legal-updated">Your message is delivered by Web3Forms and used only to respond to you. ' +
+      'See the <a href="/privacy/">privacy page</a> for details.</p>',
+    '</div>',
+    siteFooterStatic()
+  ].join('\n');
+
+  const node = {
+    '@type': 'ContactPage',
+    url: canonical,
+    name: 'Contact',
+    description: description,
+    publisher: { '@id': ORG_ID }
+  };
+  const crumbs = [{ name: 'Library', url: '/' }, { name: 'Contact', url: '/contact/' }];
+  return [
+    head({ title: 'Contact — Content Strategy Library', description, canonical, jsonld: [graph([node], crumbs)] }),
+    shellOpen(), body, bootScripts()
+  ].join('\n');
+}
+
+/* ============================================================
    PAGE: app-only shells (recommend / submit / workspace) — noindex
    404 fallback — noindex, boots the SPA which resolves the route.
    ============================================================ */
@@ -607,6 +740,8 @@ function buildSitemap(data) {
   add('/terminology/', '0.7');
   add('/faq/', '0.6');
   add('/about/', '0.5');
+  add('/contact/', '0.4');
+  add('/privacy/', '0.3');
   const body = urls.map((u) =>
     '  <url><loc>' + u.loc + '</loc><lastmod>' + BUILD_DATE + '</lastmod>' +
     '<changefreq>monthly</changefreq><priority>' + u.priority + '</priority></url>'
@@ -660,6 +795,8 @@ function buildLlmsTxt(data) {
   lines.push('- [Terminology glossary](' + SITE + '/terminology/): ' + data.TERMINOLOGY.length + ' content strategy terms defined.');
   lines.push('- [FAQ](' + SITE + '/faq/): Honest answers to common content strategy questions.');
   lines.push('- [About](' + SITE + '/about/): What this library is and who it is for.');
+  lines.push('- [Contact](' + SITE + '/contact/): Get in touch with the maintainer.');
+  lines.push('- [Privacy](' + SITE + '/privacy/): How data is handled (analytics, cookies, your rights).');
   lines.push('- [Full text dump](' + SITE + '/llms-full.txt): Every tool and term as plain text.');
   lines.push('');
   return lines.join('\n');
@@ -744,6 +881,8 @@ function build() {
   w(path.join('terminology', 'index.html'), renderTerminologyPage(data));
   w(path.join('faq', 'index.html'), renderFaqPage(data));
   w(path.join('about', 'index.html'), renderAboutPage(data));
+  w(path.join('privacy', 'index.html'), renderPrivacyPage());
+  w(path.join('contact', 'index.html'), renderContactPage());
 
   // App-only views (interactive) — noindex boot shells so deep links work + carry robots noindex
   w(path.join('recommend', 'index.html'), renderAppShell({

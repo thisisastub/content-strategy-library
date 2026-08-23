@@ -73,4 +73,6 @@
 - [Terminology glossary](https://contentstrategylibrary.com/terminology/): 29 content strategy terms defined.
 - [FAQ](https://contentstrategylibrary.com/faq/): Honest answers to common content strategy questions.
 - [About](https://contentstrategylibrary.com/about/): What this library is and who it is for.
+- [Contact](https://contentstrategylibrary.com/contact/): Get in touch with the maintainer.
+- [Privacy](https://contentstrategylibrary.com/privacy/): How data is handled (analytics, cookies, your rights).
 - [Full text dump](https://contentstrategylibrary.com/llms-full.txt): Every tool and term as plain text.

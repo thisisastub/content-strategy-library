@@ -27,7 +27,7 @@
   // Bump this when the library's content is updated.
   // Auto-stamped by build.js on every build (see stampLastUpdated). Manual edits
   // here are overwritten on the next `node build.js`.
-  const LAST_UPDATED = 'August 20, 2026';
+  const LAST_UPDATED = 'August 23, 2026';
 
   // Web3Forms endpoint for the "Submit a Tool" form. The access key is public by design
   // (Web3Forms routes it to the maintainer's inbox and handles spam filtering server-side).
@@ -327,6 +327,9 @@
           '<a href="/submit/">Submit a Tool</a>' +
           '<a href="/faq/">FAQ</a>' +
           '<a href="/about/">About</a>' +
+          '<a href="/contact/">Contact</a>' +
+          '<a href="/privacy/">Privacy</a>' +
+          '<button type="button" class="footer__cookie-prefs" onclick="if(window.openCookiePrefs)openCookiePrefs()">Cookie preferences</button>' +
         '</nav>' +
       '</div></footer>';
   }
@@ -880,11 +883,16 @@
     if (parts[0] === 'faq') return { view: 'faq' };
     if (parts[0] === 'terminology') return { view: 'terminology' };
     if (parts[0] === 'workspace') return { view: 'workspace' };
+    // Static prerendered pages the SPA does not own — leave their server HTML intact.
+    if (parts[0] === 'privacy' || parts[0] === 'contact') return { view: 'static' };
     return { view: 'index' };
   }
 
   function render(scrollTop) {
     const route = parseRoute();
+    // Static pages (privacy/contact) are fully prerendered and have no SPA view;
+    // don't touch #app or the prerendered shell.
+    if (route.view === 'static') return;
     // Category deep-links (/categories/<key>/) render the index filtered to that category.
     if (route.view === 'index' && route.filter && CAT_KEYS.has(route.filter)) {
       state.activeFilter = route.filter;
@@ -1071,6 +1079,8 @@
     // Only same-origin, root-relative, non-new-tab links are handled in-app.
     if (!href || href[0] !== '/' || href.startsWith('//')) return;
     if (a.target === '_blank' || a.hasAttribute('download')) return;
+    // Static prerendered pages have no SPA view — let the browser load them fully.
+    if (href === '/privacy/' || href === '/contact/') return;
     e.preventDefault();
     const navEl = document.querySelector('.nav');
     if (navEl) navEl.classList.remove('is-open');

@@ -27,7 +27,7 @@
   // Bump this when the library's content is updated.
   // Auto-stamped by build.js on every build (see stampLastUpdated). Manual edits
   // here are overwritten on the next `node build.js`.
-  const LAST_UPDATED = 'August 23, 2026 at 2:49 PM';
+  const LAST_UPDATED = 'August 23, 2026 at 2:54 PM';
 
   // Web3Forms endpoint for the "Submit a Tool" form. The access key is public by design
   // (Web3Forms routes it to the maintainer's inbox and handles spam filtering server-side).
@@ -523,6 +523,8 @@
 
     // results
     const results = computeResults();
+    const wsCount = state.wsTools.length;
+    const plural = wsCount === 1 ? '' : 's';
     const cards = results.map((t) => {
       const inWs = state.wsTools.indexOf(t.id) !== -1;
       const addBtn = '<button class="btn btn--sm btn--' + (inWs ? 'ghost' : 'highlight') + '" data-action="ws-add" data-id="' + t.id + '"' + (inWs ? ' disabled' : '') + '>' + (inWs ? 'Added &#10003;' : '+ Add to Workspace') + '</button>';
@@ -541,15 +543,28 @@
     }
     ).join('');
 
+    // Once tools are in the Workspace, surface the clear next step: go view it.
+    const topCta = wsCount
+      ? '<div class="ws-cta-row ws-cta-row--top"><a class="btn btn--md btn--highlight" href="/workspace/">View your Workspace (' + wsCount + ' tool' + plural + ') &rarr;</a></div>'
+      : '';
+    const bottomCta = wsCount
+      ? '<div class="ws-cta-row ws-cta-row--bottom">' +
+          '<p class="ws-cta-note"><strong>' + wsCount + ' tool' + plural + ' added.</strong> Next: open your Workspace to brand the page and export a shareable PDF or deck.</p>' +
+          '<a class="btn btn--lg btn--highlight" href="/workspace/">View your Workspace &rarr;</a>' +
+        '</div>'
+      : '<div class="ws-cta-row ws-cta-row--empty"><p class="ws-cta-note">Add the tools that fit with <strong>+ Add to Workspace</strong> above, then head to your Workspace to brand and export them.</p></div>';
+
     return shell(
       '<div class="shell-md">' +
         '<header class="wizard-header dashed-b">' +
           '<div class="detail-badge-row"><span class="badge badge--highlight">Recommended tools</span></div>' +
           '<h1 class="wizard-question">Start with these</h1>' +
-          '<p class="wizard-subtitle" style="margin-bottom:var(--space-6)">Based on what you selected, these frameworks will help most right now.</p>' +
+          '<p class="wizard-subtitle" style="margin-bottom:var(--space-5)">Based on what you selected, these frameworks will help most right now.</p>' +
+          topCta +
           '<button class="btn btn--sm btn--ghost" data-action="wizard-reset">&larr; Try again</button>' +
         '</header>' +
         '<div class="results-list">' + cards + '</div>' +
+        bottomCta +
       '</div>'
     );
   }

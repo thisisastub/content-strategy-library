@@ -23,6 +23,7 @@ const SITE = 'https://contentstrategylibrary.com';
 const AUTHOR = { name: 'Tommy Stubblefield', url: 'https://stubblefield.info' };
 const GA_MEASUREMENT_ID = 'G-HV8NC230YM'; // Google Analytics 4 (GA4), property "ConStratLib site"
 const WEB3FORMS_ACCESS_KEY = '2e290c09-02e0-4e55-b53f-0c238871ff5a'; // public by design; matches js/app.js
+const OG_IMAGE = SITE + '/images/og-default.png'; // 1200x630 branded share card
 const FIRST_PUBLISHED = '2026-01-01';
 const FIRST_PUBLISHED_ISO = FIRST_PUBLISHED + 'T00:00:00+00:00';
 // The build timestamp (BUILD_DATE / BUILD_ISO / LAST_UPDATED_STR) is derived below,
@@ -138,7 +139,13 @@ function head(opts) {
     '  <meta property="og:description" content="' + escAttr(opts.description) + '">',
     '  <meta property="og:url" content="' + escAttr(canonical) + '">',
     '  <meta property="og:site_name" content="Content Strategy Library">',
-    '  <meta name="twitter:card" content="summary">',
+    '  <meta property="og:image" content="' + OG_IMAGE + '">',
+    '  <meta property="og:image:width" content="1200">',
+    '  <meta property="og:image:height" content="630">',
+    '  <meta property="og:image:alt" content="Content Strategy Library">',
+    '  <meta name="twitter:card" content="summary_large_image">',
+    '  <meta name="twitter:image" content="' + OG_IMAGE + '">',
+    '  <meta name="twitter:image:alt" content="Content Strategy Library">',
     '  <link rel="icon" type="image/png" href="https://static.thenounproject.com/png/library-icon-8367955-512.png">',
     '  <link rel="stylesheet" href="/css/styles.css">',
     ldTags ? '  ' + ldTags : '',
@@ -316,6 +323,7 @@ function renderToolPage(data, tool) {
     description: description,
     url: canonical,
     mainEntityOfPage: canonical,
+    image: { '@type': 'ImageObject', url: OG_IMAGE, width: 1200, height: 630 },
     author: { '@id': PERSON_ID },
     publisher: { '@id': ORG_ID },
     datePublished: FIRST_PUBLISHED_ISO,

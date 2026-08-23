@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1200px; height: 630px; }
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    background: #F8F7F2;
+    color: #16160E;
+    position: relative;
+    overflow: hidden;
+  }
+  /* marker accent, top-left */
+  .swipe {
+    position: absolute; top: 0; left: 0; width: 100%; height: 14px;
+    background: #F7C531;
+  }
+  .wrap {
+    position: absolute; inset: 0;
+    padding: 82px 90px;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .brand { display: flex; align-items: center; gap: 22px; }
+  .mark {
+    width: 76px; height: 76px; border-radius: 12px; background: #16160E;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .mark svg { display: block; }
+  .brand-name { font-size: 34px; font-weight: 600; letter-spacing: -0.02em; }
+  .body { }
+  .headline {
+    font-size: 82px; font-weight: 700; line-height: 1.04; letter-spacing: -0.03em;
+    max-width: 20ch;
+  }
+  .mark-hl {
+    background: #F7C531; padding: 0 10px; border-radius: 4px;
+    box-decoration-break: clone; -webkit-box-decoration-break: clone;
+  }
+  .tagline {
+    margin-top: 34px; font-size: 33px; font-weight: 500; color: #52524A;
+    line-height: 1.4; max-width: 30ch;
+  }
+  .foot {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 26px; color: #52524A; font-weight: 500;
+  }
+  .foot .count { color: #16160E; font-weight: 600; }
+  .domain { font-weight: 600; color: #16160E; }
+</style>
+</head>
+<body>
+  <div class="swipe"></div>
+  <div class="wrap">
+    <div class="brand">
+      <span class="mark">
+        <svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 22 22" aria-hidden="true">
+          <defs><filter id="hl"><feFlood flood-color="#F7C531" result="c"></feFlood><feComposite in="c" in2="SourceAlpha" operator="in"></feComposite></filter></defs>
+          <image href="https://static.thenounproject.com/png/library-icon-8367955-512.png" x="0" y="0" width="22" height="22" filter="url(#hl)"></image>
+        </svg>
+      </span>
+      <span class="brand-name">Content Strategy Library</span>
+    </div>
+
+    <div class="body">
+      <div class="headline">The <span class="mark-hl">content strategy</span> tools, in one place.</div>
+      <div class="tagline">Frameworks content strategists actually use, what each one is and when to reach for it.</div>
+    </div>
+
+    <div class="foot">
+      <span><span class="count">42 tools</span> across 8 categories, free.</span>
+      <span class="domain">contentstrategylibrary.com</span>
+    </div>
+  </div>
+</body>
+</html>

@@ -27,7 +27,7 @@
   // Bump this when the library's content is updated.
   // Auto-stamped by build.js on every build (see stampLastUpdated). Manual edits
   // here are overwritten on the next `node build.js`.
-  const LAST_UPDATED = 'August 23, 2026 at 3:07 PM';
+  const LAST_UPDATED = 'August 23, 2026 at 4:48 PM';
 
   // Web3Forms endpoint for the "Submit a Tool" form. The access key is public by design
   // (Web3Forms routes it to the maintainer's inbox and handles spam filtering server-side).
@@ -342,7 +342,13 @@
   }
 
   function shell(inner) {
-    return '<div class="page">' + nav() + '<div class="grow">' + inner + '</div>' + footer() + '</div>';
+    return '<div class="page">' +
+      '<a class="skip-link" href="#maincontent">Skip to content</a>' +
+      '<span id="sr-status" class="sr-only" role="status" aria-live="polite"></span>' +
+      nav() +
+      '<main class="grow" id="maincontent" tabindex="-1">' + inner + '</main>' +
+      footer() +
+    '</div>';
   }
 
   // ── INDEX ──
@@ -602,7 +608,7 @@
       )).join('');
 
     const linkInputs = f.links.map((val, i) =>
-      '<input class="input" type="url" data-form="link" data-i="' + i + '" value="' + esc(val) + '" placeholder="https://...">'
+      '<input class="input" type="url" data-form="link" data-i="' + i + '" aria-label="Link ' + (i + 1) + '" value="' + esc(val) + '" placeholder="https://...">'
     ).join('');
 
     const disabled = state.submitSending || !(f.name.trim() && f.desc.trim());
@@ -615,14 +621,14 @@
           '<p class="wizard-subtitle">Know a content strategy tool not in this library? Add it.</p>' +
         '</header>' +
         '<div class="form-stack">' +
-          '<div><label class="field-label">Tool name <span class="req">*</span></label>' +
-            '<input class="input" data-form="name" value="' + esc(f.name) + '" placeholder="e.g. Content Strategy Framework"></div>' +
-          '<div><label class="field-label">Description <span class="req">*</span></label>' +
-            '<textarea class="input" data-form="desc" rows="5" placeholder="Describe what this tool is and how content strategists use it...">' + esc(f.desc) + '</textarea></div>' +
-          '<div><label class="field-label">Short purpose <span class="opt">(optional)</span></label>' +
-            '<input class="input" data-form="purpose" value="' + esc(f.purpose) + '" placeholder="One-line tagline for the tool"></div>' +
-          '<div><label class="field-label">Category <span class="opt">(optional)</span></label>' +
-            '<select class="input" data-form="cat">' + catOpts + '</select></div>' +
+          '<div><label class="field-label" for="sf-name">Tool name <span class="req">*</span></label>' +
+            '<input class="input" id="sf-name" data-form="name" value="' + esc(f.name) + '" placeholder="e.g. Content Strategy Framework"></div>' +
+          '<div><label class="field-label" for="sf-desc">Description <span class="req">*</span></label>' +
+            '<textarea class="input" id="sf-desc" data-form="desc" rows="5" placeholder="Describe what this tool is and how content strategists use it...">' + esc(f.desc) + '</textarea></div>' +
+          '<div><label class="field-label" for="sf-purpose">Short purpose <span class="opt">(optional)</span></label>' +
+            '<input class="input" id="sf-purpose" data-form="purpose" value="' + esc(f.purpose) + '" placeholder="One-line tagline for the tool"></div>' +
+          '<div><label class="field-label" for="sf-cat">Category <span class="opt">(optional)</span></label>' +
+            '<select class="input" id="sf-cat" data-form="cat">' + catOpts + '</select></div>' +
           '<div><label class="field-label">Links <span class="opt">(optional, examples, templates, original sources)</span></label>' +
             '<div class="links-stack">' + linkInputs + '</div></div>' +
           '<div class="submit-foot">' +
@@ -686,12 +692,12 @@
           '<p class="wizard-subtitle">Questions, corrections, a tool worth adding, or a privacy request? Send a note below.</p>' +
         '</header>' +
         '<div class="form-stack">' +
-          '<div><label class="field-label">Your name <span class="req">*</span></label>' +
-            '<input class="input" data-cform="name" value="' + esc(f.name) + '" placeholder="Your name"></div>' +
-          '<div><label class="field-label">Your email <span class="req">*</span></label>' +
-            '<input class="input" type="email" data-cform="email" value="' + esc(f.email) + '" placeholder="you@example.com"></div>' +
-          '<div><label class="field-label">Message <span class="req">*</span></label>' +
-            '<textarea class="input" data-cform="message" rows="6" placeholder="How can I help?">' + esc(f.message) + '</textarea></div>' +
+          '<div><label class="field-label" for="cf-name">Your name <span class="req">*</span></label>' +
+            '<input class="input" id="cf-name" data-cform="name" value="' + esc(f.name) + '" placeholder="Your name"></div>' +
+          '<div><label class="field-label" for="cf-email">Your email <span class="req">*</span></label>' +
+            '<input class="input" id="cf-email" type="email" data-cform="email" value="' + esc(f.email) + '" placeholder="you@example.com"></div>' +
+          '<div><label class="field-label" for="cf-message">Message <span class="req">*</span></label>' +
+            '<textarea class="input" id="cf-message" data-cform="message" rows="6" placeholder="How can I help?">' + esc(f.message) + '</textarea></div>' +
           '<div class="submit-foot">' +
             '<button class="btn btn--lg btn--highlight" data-action="contact-send"' + (disabled ? ' disabled' : '') + '>' + (state.contactSending ? 'Sending&hellip;' : 'Send message') + '</button>' +
             (state.contactError ? '<p class="submit-error">' + esc(state.contactError) + '</p>' : '<p>Your message is emailed straight to the library maintainer. See the <a href="/privacy/" class="csl-body-link">privacy page</a> for details.</p>') +
@@ -905,14 +911,14 @@
           '<h2 style="font-family:var(--font-sans);font-size:var(--text-2xl);font-weight:var(--weight-bold);color:var(--text-primary);margin:0 0 var(--space-2);letter-spacing:var(--tracking-tight)">Brand your export</h2>' +
           '<p style="font-family:var(--font-sans);font-size:var(--text-sm);color:var(--text-muted);margin:0 0 var(--space-6);max-width:60ch">Define what success looks like for this program, then personalize the cover for your company, agency, or client. Leave anything blank to fall back to the library defaults.</p>' +
           '<div style="margin-bottom:var(--space-8);max-width:760px">' +
-            '<label class="field-label">What does success look like?</label>' +
+            '<label class="field-label" for="wf-success">What does success look like?</label>' +
             '<p style="font-family:var(--font-sans);font-size:var(--text-sm);color:var(--text-muted);margin:0 0 var(--space-3);line-height:var(--leading-normal)">The outcome this set of tools is meant to drive. State it as a business result, not a content metric, this leads your exported cover.</p>' +
-            '<textarea class="input" data-form="brand-success" rows="3" placeholder="e.g. Shorten the sales cycle by giving prospects the content they need at each stage, measured by a 15% lift in pipeline velocity within two quarters.">' + esc(b.success || '') + '</textarea>' +
+            '<textarea class="input" id="wf-success" data-form="brand-success" rows="3" placeholder="e.g. Shorten the sales cycle by giving prospects the content they need at each stage, measured by a 15% lift in pipeline velocity within two quarters.">' + esc(b.success || '') + '</textarea>' +
           '</div>' +
           '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:var(--space-5);margin-bottom:var(--space-6)">' +
-            '<div><label class="field-label">Company / agency / your name</label><input class="input" data-form="brand-org" value="' + esc(b.org || '') + '" placeholder="e.g. Northwind Content Studio"></div>' +
-            '<div><label class="field-label">Prepared by <span class="opt">(optional)</span></label><input class="input" data-form="brand-preparedBy" value="' + esc(b.preparedBy || '') + '" placeholder="Your name or role"></div>' +
-            '<div><label class="field-label">Prepared for <span class="opt">(optional)</span></label><input class="input" data-form="brand-preparedFor" value="' + esc(b.preparedFor || '') + '" placeholder="Client or team name"></div>' +
+            '<div><label class="field-label" for="wf-org">Company / agency / your name</label><input class="input" id="wf-org" data-form="brand-org" value="' + esc(b.org || '') + '" placeholder="e.g. Northwind Content Studio"></div>' +
+            '<div><label class="field-label" for="wf-by">Prepared by <span class="opt">(optional)</span></label><input class="input" id="wf-by" data-form="brand-preparedBy" value="' + esc(b.preparedBy || '') + '" placeholder="Your name or role"></div>' +
+            '<div><label class="field-label" for="wf-for">Prepared for <span class="opt">(optional)</span></label><input class="input" id="wf-for" data-form="brand-preparedFor" value="' + esc(b.preparedFor || '') + '" placeholder="Client or team name"></div>' +
           '</div>' +
           '<div style="margin-bottom:var(--space-8)"><label class="field-label" style="margin-bottom:var(--space-3)">Accent color</label><div style="display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap">' + accentBtns + '</div></div>' +
           '<div style="background:var(--bg-subtle);border:1px solid var(--border);border-radius:var(--radius-lg);padding:var(--space-6);max-width:420px">' +
@@ -1001,7 +1007,15 @@
     // matching route, so crawlers keep the server HTML but users see no duplicate.
     const pre = document.getElementById('prerender');
     if (pre) pre.remove();
-    if (scrollTop) window.scrollTo(0, 0);
+    if (scrollTop) {
+      window.scrollTo(0, 0);
+      // Real navigation (not an in-view update): move focus to the new content and
+      // announce the page to screen readers, so keyboard/SR users aren't left behind.
+      const main = document.getElementById('maincontent');
+      if (main) { try { main.focus({ preventScroll: true }); } catch (e) { main.focus(); } }
+      const status = document.getElementById('sr-status');
+      if (status) status.textContent = document.title;
+    }
   }
 
   function pageTitle(route) {

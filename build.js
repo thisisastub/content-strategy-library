@@ -125,6 +125,20 @@ function head(opts) {
     '<head>',
     '  <meta charset="utf-8">',
     '  <meta name="viewport" content="width=device-width, initial-scale=1">',
+    // Content-Security-Policy (defense-in-depth). 'unsafe-inline' is needed for the inline
+    // GA config + inline style attributes; 'unsafe-eval' is required by the PPTX/DOCX export
+    // libraries (they use Function("return this")). Sources are the only external hosts used.
+    '  <meta http-equiv="Content-Security-Policy" content="' + [
+      "default-src \'self\'",
+      "script-src \'self\' \'unsafe-inline\' \'unsafe-eval\' https://www.googletagmanager.com",
+      "style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com",
+      "font-src \'self\' https://fonts.gstatic.com",
+      "img-src \'self\' data: https://static.thenounproject.com https://www.google-analytics.com https://www.googletagmanager.com",
+      "connect-src \'self\' https://api.web3forms.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com",
+      "form-action \'self\' https://api.web3forms.com",
+      "base-uri \'self\'",
+      "object-src \'none\'"
+    ].join('; ') + '">',
     '  <!-- Google tag (gtag.js), GA4 -->',
     '  <script async src="https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID + '"></script>',
     '  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}' +
@@ -199,10 +213,10 @@ function siteFooterStatic() {
 function bootScripts() {
   return [
     '</main>',
-    '<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js" defer></script>',
-    '<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js" defer></script>',
-    '<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js" defer></script>',
-    '<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>',
+    '<script src="/vendor/pptxgen.bundle.js" defer></script>',
+    '<script src="/vendor/docx.umd.js" defer></script>',
+    '<script src="/vendor/pdf-lib.min.js" defer></script>',
+    '<script src="/vendor/xlsx.full.min.js" defer></script>',
     '<script src="/js/data.js"></script>',
     '<script src="/js/icons.js"></script>',
     '<script src="/js/templates.js"></script>',

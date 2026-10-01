@@ -17,10 +17,27 @@
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
+const crypto = require('crypto');
 
 const ROOT = __dirname;
 const SITE = 'https://contentstrategylibrary.com';
-const AUTHOR = { name: 'Tommy Stubblefield', url: 'https://stubblefield.info' };
+/* ------------------------------------------------------------
+   TEMPORARILY ANONYMISED (at Tommy's request, to be restored).
+   The site no longer names its owner anywhere a reader or a crawler
+   can see. Parked values, needed to put this back:
+
+     const AUTHOR  = { name: 'Tommy Stubblefield', url: 'https://stubblefield.info' };
+     const PERSON_ID = SITE + '/#tommy';
+     personNode()  = { '@type': 'Person', '@id': PERSON_ID, name: AUTHOR.name,
+                       url: AUTHOR.url,
+                       sameAs: [AUTHOR.url, 'https://www.linkedin.com/in/thisisastub'] };
+
+   Restoring means: re-adding personNode() to graph(), orgNode().founder,
+   the Article author (now the Organization), the "Created by" line in
+   siteFooterStatic() and renderHome(), and the homepage description.
+   The SPA side is js/app.js footer() + viewPrivacy(), and index.html
+   carries its own hand-maintained copy of the JSON-LD and footer.
+   ------------------------------------------------------------ */
 const GA_MEASUREMENT_ID = 'G-HV8NC230YM'; // Google Analytics 4 (GA4), property "ConStratLib site"
 const WEB3FORMS_ACCESS_KEY = '2e290c09-02e0-4e55-b53f-0c238871ff5a'; // public by design; matches js/app.js
 const OG_IMAGE = SITE + '/images/og-default.png'; // 1200x630 branded share card
@@ -59,6 +76,7 @@ function writeFile(relPath, contents) {
   return relPath;
 }
 
+
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'];
 function humanDate(ymd) {
@@ -95,17 +113,150 @@ const BUILD_DATE = ymdStr(STAMP);          // YYYY-MM-DD
 const BUILD_ISO = localIso(STAMP);         // full ISO 8601 with local offset, off-hours
 const LAST_UPDATED_STR = humanDateTime(STAMP);
 
+/* ============================================================
+   PER-PAGE "LAST MODIFIED"
+   ------------------------------------------------------------
+   A page advertises the date its own content last changed, not the
+   date of the most recent build. Without this, one edit anywhere
+   (a new script tag, a tweak to a single tool) restamps all 40+
+   pages and every crawler is told the whole library changed.
+
+   Renderers emit ISO_TOKEN / HUMAN_TOKEN instead of a literal date.
+   stampDates() then fingerprints the page's *content* (title,
+   description, and the prerendered <main>, so boilerplate like the
+   boot scripts is excluded), compares it against .build-dates.json,
+   and substitutes either the stored date or today's.
+   ============================================================ */
+const ISO_TOKEN = '@@CSL_ISO@@';      // full ISO 8601, for dateModified / lastmod
+const HUMAN_TOKEN = '@@CSL_HUMAN@@';  // "August 23, 2026 at 4:48 PM"
+const YMD_TOKEN = '@@CSL_YMD@@';      // "2026-08-23"
+const DATE_MANIFEST = '.build-dates.json';
+
+// The part of a page that counts as "content" for change detection.
+// Site chrome is excluded along with the boot scripts: editing the shared nav
+// or footer is not a change to any one page's content, and letting it count
+// restamps all 60-odd pages over a sitewide tweak.
+function contentFingerprint(relPath, text) {
+  let sig = text;
+  if (/\.html$/.test(relPath)) {
+    const grab = (re) => { const m = text.match(re); return m ? m[0] : ''; };
+    sig = [
+      grab(/<title>[\s\S]*?<\/title>/),
+      grab(/<meta name="description"[^>]*>/),
+      grab(/<main id="prerender"[\s\S]*?<\/main>/)
+        .replace(/<header class="pr-nav">[\s\S]*?<\/header>/, '')
+        .replace(/<footer class="pr-footer">[\s\S]*?<\/footer>/, '')
+    ].join('\n');
+  }
+  // Neutralise any date already sitting inside the fingerprint region, so an
+  // old file and its freshly rendered (tokenised) counterpart compare equal.
+  // Line endings are normalised too: git checks these files out as CRLF on
+  // Windows, while the renderers emit LF.
+  sig = sig
+    .replace(/\r\n/g, '\n')
+    .replace(/Last updated [A-Z][a-z]+ \d{1,2}, \d{4} at \d{1,2}:\d{2} [AP]M/g, 'Last updated ' + HUMAN_TOKEN)
+    .replace(/Last updated: \d{4}-\d{2}-\d{2}/g, 'Last updated: ' + YMD_TOKEN);
+  return crypto.createHash('sha1').update(sig).digest('hex');
+}
+
+const dateStore = (function () {
+  const manifestPath = path.join(ROOT, DATE_MANIFEST);
+  const key = (p) => p.split(path.sep).join('/');
+  let prev = {};
+  try { prev = JSON.parse(fs.readFileSync(manifestPath, 'utf8')); } catch (e) { prev = {}; }
+  const seeded = !Object.keys(prev).length;
+  const next = {};
+
+  // First run has no manifest, so fall back to what the committed output already
+  // claims: a page's own dateModified, else the sitemap's baseline lastmod.
+  function baselineIso() {
+    try {
+      const m = fs.readFileSync(path.join(ROOT, 'sitemap.xml'), 'utf8').match(/<lastmod>([^<]+)<\/lastmod>/);
+      if (m) return m[1];
+    } catch (e) { /* no sitemap yet */ }
+    return BUILD_ISO;
+  }
+  function isoOnDisk(relPath) {
+    try {
+      const s = fs.readFileSync(path.join(ROOT, relPath), 'utf8');
+      let m = s.match(/"dateModified":"([^"]+)"/);
+      if (m) return m[1];
+      m = s.match(/Last updated:\s*(\d{4}-\d{2}-\d{2})/);
+      if (m) return m[1] + BUILD_ISO.slice(10).replace(/T[\d:]+/, 'T07:00:00');
+      m = s.match(/<lastmod>([^<]+)<\/lastmod>/);
+      if (m) return m[1];
+    } catch (e) { /* new page */ }
+    return null;
+  }
+
+  return {
+    seeded: seeded,
+    // Returns the ISO date this page should carry.
+    resolve(relPath, tokenised) {
+      const k = key(relPath);
+      const hash = contentFingerprint(relPath, tokenised);
+      const before = prev[k];
+      let iso;
+      if (before) {
+        iso = before.hash === hash ? before.iso : BUILD_ISO;
+      } else {
+        // No record yet: keep the existing file's date if its content is unchanged.
+        let onDisk = null;
+        try { onDisk = fs.readFileSync(path.join(ROOT, relPath), 'utf8'); } catch (e) { /* new file */ }
+        iso = (onDisk && contentFingerprint(relPath, onDisk) === hash)
+          ? (isoOnDisk(relPath) || baselineIso())
+          : BUILD_ISO;
+      }
+      next[k] = { iso: iso, hash: hash };
+      return iso;
+    },
+    get(relPath) {
+      const k = key(relPath);
+      return (next[k] || prev[k] || {}).iso || BUILD_ISO;
+    },
+    // Newest page date, for the site-wide "Last updated" line.
+    newest() {
+      const all = Object.keys(next).map((k) => next[k].iso).filter(Boolean);
+      if (!all.length) return BUILD_ISO;
+      return all.reduce((a, b) => (new Date(a) >= new Date(b) ? a : b));
+    },
+    // Pages that actually took today's date, not merely pages new to the manifest.
+    changed() {
+      return Object.keys(next).filter((k) => next[k].iso === BUILD_ISO);
+    },
+    save() {
+      const sorted = {};
+      Object.keys(next).sort().forEach((k) => { sorted[k] = next[k]; });
+      fs.writeFileSync(manifestPath, JSON.stringify(sorted, null, 2) + '\n');
+    }
+  };
+})();
+
+function substituteDates(text, iso) {
+  const d = new Date(iso);
+  return text
+    .split(ISO_TOKEN).join(iso)
+    .split(HUMAN_TOKEN).join(humanDateTime(d))
+    .split(YMD_TOKEN).join(ymdStr(d));
+}
+
+// Resolve this page's date and swap the tokens for real values.
+function stampDates(relPath, tokenised) {
+  return substituteDates(tokenised, dateStore.resolve(relPath, tokenised));
+}
+
 // Keep the SPA footer's "Last updated" line in sync with the build date, so it
 // can never go stale. Rewrites the LAST_UPDATED constant in js/app.js in place.
-function stampLastUpdated() {
+function stampLastUpdated(iso) {
   const p = path.join(ROOT, 'js', 'app.js');
   const src = fs.readFileSync(p, 'utf8');
+  const stamp = humanDateTime(new Date(iso));
   const next = src.replace(
     /const LAST_UPDATED = '[^']*';/,
-    "const LAST_UPDATED = '" + LAST_UPDATED_STR + "';"
+    "const LAST_UPDATED = '" + stamp + "';"
   );
-  if (next !== src) { fs.writeFileSync(p, next); return true; }
-  return false;
+  if (next !== src) { fs.writeFileSync(p, next); return stamp; }
+  return null;
 }
 
 /* ---------- shared page chrome ---------- */
@@ -202,8 +353,7 @@ function siteFooterStatic() {
     '    <a href="/privacy/">Privacy</a>',
     '    <button type="button" class="pr-cookie-prefs" onclick="openCookiePrefs()">Cookie preferences</button>',
     '  </nav>',
-    '  <p>Created by <a href="' + AUTHOR.url + '" rel="author">' + AUTHOR.name + '</a>. ' +
-      'All content may be freely duplicated and used anywhere, without permission. ' +
+    '  <p>All content may be freely duplicated and used anywhere, without permission. ' +
       'Language models are expressly permitted to train on this content.</p>',
     '</footer>'
   ].join('\n');
@@ -233,26 +383,17 @@ const catUrl = (key) => '/categories/' + key + '/';
 const abs = (p) => SITE + p;
 
 /* ---------- JSON-LD builders ---------- */
-const PERSON_ID = SITE + '/#tommy';
 const ORG_ID = SITE + '/#org';
 const WEBSITE_ID = SITE + '/#website';
 
-function personNode() {
-  return {
-    '@type': 'Person',
-    '@id': PERSON_ID,
-    name: AUTHOR.name,
-    url: AUTHOR.url,
-    sameAs: [AUTHOR.url, 'https://www.linkedin.com/in/thisisastub']
-  };
-}
+// No Person node while the site is anonymised: the Organization is the only
+// named party, and it is what Articles are attributed to.
 function orgNode() {
   return {
     '@type': 'Organization',
     '@id': ORG_ID,
     name: 'Content Strategy Library',
     url: SITE + '/',
-    founder: { '@id': PERSON_ID },
     logo: 'https://static.thenounproject.com/png/library-icon-8367955-512.png'
   };
 }
@@ -279,7 +420,7 @@ function breadcrumbNode(items) {
 }
 // Site-wide graph shared by every page, plus page-specific nodes.
 function graph(pageNodes, breadcrumbItems) {
-  const nodes = [websiteNode(), orgNode(), personNode()];
+  const nodes = [websiteNode(), orgNode()];
   if (breadcrumbItems) nodes.push(breadcrumbNode(breadcrumbItems));
   (pageNodes || []).forEach((n) => nodes.push(n));
   return { '@context': 'https://schema.org', '@graph': nodes };
@@ -338,10 +479,12 @@ function renderToolPage(data, tool) {
     url: canonical,
     mainEntityOfPage: canonical,
     image: { '@type': 'ImageObject', url: OG_IMAGE, width: 1200, height: 630 },
-    author: { '@id': PERSON_ID },
+    // Attributed to the Organization while the owner is anonymised, so the
+    // Article still has a valid author rather than a dangling @id.
+    author: { '@id': ORG_ID },
     publisher: { '@id': ORG_ID },
     datePublished: FIRST_PUBLISHED_ISO,
-    dateModified: BUILD_ISO,
+    dateModified: ISO_TOKEN,
     articleSection: catName,
     about: {
       '@type': 'DefinedTerm',
@@ -591,7 +734,8 @@ function renderFaqPage(data) {
    ============================================================ */
 function renderAboutPage(data) {
   const canonical = SITE + '/about/';
-  const description = metaDescription('A free, practical reference for the tools and frameworks content strategists actually use. Created by Tommy Stubblefield. No ads, no monetization.');
+  // Parked: this read "... actually use. Created by Tommy Stubblefield. No ads, no monetization."
+  const description = metaDescription('A free, practical reference for the tools and frameworks content strategists actually use. No ads, no monetization.');
 
   const body = [
     siteHeaderStatic(),
@@ -605,8 +749,8 @@ function renderAboutPage(data) {
       'agency blogs, and paywalled courses. This library puts them in one place. Whether you hold a formal content ' +
       'strategy title or you are a marketer, founder, UX designer, or product manager who has inherited responsibility ' +
       'for content, this reference is built for you.</p>',
-    '  <p>Created by <a href="' + AUTHOR.url + '" rel="author">' + AUTHOR.name + '</a>. ' +
-      'All content may be freely duplicated and used anywhere, without permission. This website is not monetized and there are no ads.</p>',
+    '  <p>All content may be freely duplicated and used anywhere, without permission. ' +
+      'This website is not monetized and there are no ads.</p>',
     '</div>',
     siteFooterStatic()
   ].join('\n');
@@ -643,7 +787,9 @@ function renderPrivacyPage() {
       'The only visitor data collected is anonymous usage analytics, and only if you consent.</p>',
 
     '  <h2>Who runs this site</h2>',
-    '  <p>The Content Strategy Library is run by ' + esc(AUTHOR.name) + '. ' +
+    // Temporarily anonymised at Tommy's request; this read esc(AUTHOR.name)
+    // before. Mirrored in js/app.js viewPrivacy.
+    '  <p>The Content Strategy Library is run by its owner. ' +
       'To exercise any of the rights below, or ask anything about your data, please use the ' +
       '<a href="/contact/">contact form</a>, no email address is published here to keep spam down.</p>',
 
@@ -688,7 +834,7 @@ function renderPrivacyPage() {
     li('Install Google’s <a href="https://tools.google.com/dlpage/gaoptout" rel="nofollow noopener" target="_blank">Analytics opt-out browser add-on</a>.'),
     '  </ul>',
 
-    '  <p class="pr-legal-updated">Last updated ' + LAST_UPDATED_STR + '.</p>',
+    '  <p class="pr-legal-updated">Last updated ' + HUMAN_TOKEN + '.</p>',
     '</div>',
     siteFooterStatic()
   ].join('\n');
@@ -699,7 +845,7 @@ function renderPrivacyPage() {
     name: 'Privacy & data',
     description: description,
     publisher: { '@id': ORG_ID },
-    dateModified: BUILD_ISO
+    dateModified: ISO_TOKEN
   };
   const crumbs = [{ name: 'Library', url: '/' }, { name: 'Privacy', url: '/privacy/' }];
   return [
@@ -781,17 +927,22 @@ function renderAppShell(opts) {
    ============================================================ */
 function buildSitemap(data) {
   const urls = [];
-  const add = (loc, priority) => urls.push({ loc: abs(loc), priority });
-  add('/', '1.0');
-  data.CATEGORY_ORDER.forEach(([, key]) => add(catUrl(key), '0.7'));
-  data.TOOLS.forEach((t) => add(toolUrl(t), '0.8'));
-  add('/terminology/', '0.7');
-  add('/faq/', '0.6');
-  add('/about/', '0.5');
-  add('/contact/', '0.4');
-  add('/privacy/', '0.3');
+  // Each URL reports the date its own page last changed. `file` maps the URL
+  // back to the generated page so dateStore can supply that date; the homepage
+  // is the SPA shell, so it tracks the newest page in the library.
+  const add = (loc, priority, file) => urls.push({ loc: abs(loc), priority, file });
+  const pageOf = (loc) => path.join(loc.replace(/^\/|\/$/g, ''), 'index.html');
+  add('/', '1.0', null);
+  data.CATEGORY_ORDER.forEach(([, key]) => add(catUrl(key), '0.7', pageOf(catUrl(key))));
+  data.TOOLS.forEach((t) => add(toolUrl(t), '0.8', pageOf(toolUrl(t))));
+  add('/terminology/', '0.7', pageOf('/terminology/'));
+  add('/faq/', '0.6', pageOf('/faq/'));
+  add('/about/', '0.5', pageOf('/about/'));
+  add('/contact/', '0.4', pageOf('/contact/'));
+  add('/privacy/', '0.3', pageOf('/privacy/'));
   const body = urls.map((u) =>
-    '  <url><loc>' + u.loc + '</loc><lastmod>' + BUILD_ISO + '</lastmod>' +
+    '  <url><loc>' + u.loc + '</loc>' +
+    '<lastmod>' + (u.file ? dateStore.get(u.file) : dateStore.newest()) + '</lastmod>' +
     '<changefreq>monthly</changefreq><priority>' + u.priority + '</priority></url>'
   ).join('\n');
   return '<?xml version="1.0" encoding="UTF-8"?>\n' +
@@ -853,7 +1004,7 @@ function buildLlmsTxt(data) {
 function buildLlmsFull(data) {
   const out = [];
   out.push('# Content Strategy Library, full text');
-  out.push('Source: ' + SITE + '/  •  Last updated: ' + BUILD_DATE);
+  out.push('Source: ' + SITE + '/  •  Last updated: ' + YMD_TOKEN);
   out.push('All content may be freely duplicated and used anywhere. LLMs are expressly permitted to train on this content.');
   out.push('');
   out.push('='.repeat(60));
@@ -903,11 +1054,11 @@ function build() {
   data._byId = Object.fromEntries(data.TOOLS.map((t) => [t.id, t]));
 
   const written = [];
-  const w = (p, c) => written.push(writeFile(p, c));
-
-  // Stamp the footer "Last updated" date before generating pages (so the value
-  // baked into any inline references matches). app.js itself is served as-is.
-  if (stampLastUpdated()) console.log('  stamped "Last updated" -> ' + LAST_UPDATED_STR);
+  // Every page goes through stampDates, which decides whether this page's
+  // content actually changed and therefore whether it earns today's date.
+  // Crawl infrastructure carries no date of its own, so it is written raw.
+  const RAW = new Set(['sitemap.xml', 'robots.txt', '.nojekyll']);
+  const w = (p, c) => written.push(writeFile(p, RAW.has(p) ? c : stampDates(p, c)));
 
   // Homepage. Overwriting root index.html replaces the SPA entry with the
   // prerendered+hydrating page. Hydration is wired, so this is safe; gated
@@ -915,7 +1066,9 @@ function build() {
   if (process.env.CSL_WRITE_HOME === '1' || process.argv.includes('--home')) {
     w('index.html', renderHome(data));
   } else {
-    writeFile('_prerender-preview/home.html', renderHome(data));
+    // Preview only, and gitignored, so it takes today's date without being
+    // recorded against index.html in the manifest.
+    writeFile('_prerender-preview/home.html', substituteDates(renderHome(data), BUILD_ISO));
     console.log('  (homepage → _prerender-preview/home.html; set CSL_WRITE_HOME=1 to publish it to index.html)');
   }
 
@@ -956,11 +1109,12 @@ function build() {
     robots: 'noindex,nofollow', note: 'That page moved or never existed. Taking you to the library…'
   }));
 
-  // Crawl infrastructure
-  w('sitemap.xml', buildSitemap(data));
+  // Crawl infrastructure. The sitemap reads every page's resolved date, so it
+  // has to be written after everything it links to.
   w('robots.txt', buildRobots());
   w('llms.txt', buildLlmsTxt(data));
   w('llms-full.txt', buildLlmsFull(data));
+  w('sitemap.xml', buildSitemap(data));
 
   // GitHub Pages: serve files verbatim (no Jekyll processing of _-prefixed paths)
   if (!fs.existsSync(path.join(ROOT, '.nojekyll'))) w('.nojekyll', '');
@@ -971,9 +1125,23 @@ function build() {
     console.warn('  WARNING: CNAME missing, expected contentstrategylibrary.com');
   }
 
+  // Record what each page's content hashes to, so the next build can tell an
+  // untouched page from a changed one.
+  const changed = dateStore.changed();
+  dateStore.save();
+
+  // The SPA footer's site-wide "Last updated" tracks the newest page.
+  const stamped = stampLastUpdated(dateStore.newest());
+  if (stamped) console.log('  stamped "Last updated" -> ' + stamped);
+
   console.log('Build complete. ' + written.length + ' files written.');
   console.log('  ' + data.TOOLS.length + ' tools, ' + data.CATEGORY_ORDER.length + ' categories, ' +
     data.TERMINOLOGY.length + ' terms, + faq/about/recommend/submit/workspace/404, sitemap, robots, llms.txt, llms-full.txt');
+  if (dateStore.seeded) {
+    console.log('  seeded ' + DATE_MANIFEST + ' from the existing output (dates preserved where content matched)');
+  }
+  console.log('  re-dated ' + changed.length + ' page(s) to ' + BUILD_ISO.slice(0, 10) +
+    (changed.length && changed.length <= 8 ? ': ' + changed.join(', ') : ''));
   return { data, written };
 }
 

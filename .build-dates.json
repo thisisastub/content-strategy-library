@@ -1,0 +1,246 @@
+{
+  "404.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "d53b91e8c53b59ed8ca0c4482159933447e710ee"
+  },
+  "about/index.html": {
+    "iso": "2026-10-01T07:55:07-04:00",
+    "hash": "92e98b1d31c943ad5ad63da6b58a54149871e867"
+  },
+  "categories/audience/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "1144581953db7f097db7f45403f8ae7223ac0ad1"
+  },
+  "categories/core/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "c87357b6366d0b380e0ba7c46475f81fa65844ed"
+  },
+  "categories/discovery/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "00338825610412849f12c1b02facfd51595221fc"
+  },
+  "categories/ia/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "8edcc62cd9b001a87d3992595b74d428bc440592"
+  },
+  "categories/measurement/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "fe75d74a98c122243072cd1fd0e038c016228f2c"
+  },
+  "categories/planning/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "a8753a47407b683716b2bef45989dd712b8d7fcb"
+  },
+  "categories/strategy/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "72ec5ea7e1969adf719218aeec36083fb0204873"
+  },
+  "categories/structure/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "0fff0c221d767c7a775ad30ec9fabf15d74cc7ca"
+  },
+  "contact/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "96c68fa520483f61d842b12e825ead1794c83a13"
+  },
+  "faq/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "082933ed733187eb2842ae58a76d7063038175ca"
+  },
+  "llms-full.txt": {
+    "iso": "2026-08-23T07:00:00-04:00",
+    "hash": "5ca866eeb7f31b22851a0d375d84f4854a898dcb"
+  },
+  "llms.txt": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "07803f5bda7218bd398fa38d94b688053febbcef"
+  },
+  "privacy/index.html": {
+    "iso": "2026-10-01T07:55:07-04:00",
+    "hash": "bd0a8ed3e3dba52fda0c535c3da1b3cc18c8cab9"
+  },
+  "recommend/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "fb3f0db4bf15342eb00529e2a537f14de05c63c7"
+  },
+  "submit/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "4fa3a0042bf57790d9ee5017c84486f7180a9842"
+  },
+  "terminology/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "a1be500970891e18fff4bc80ad98cb9c153d7945"
+  },
+  "tools/audience-personas/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "5d0f79f6108f3c509956bc10ed79ce8ee9c6812e"
+  },
+  "tools/brand-archetypes/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "9f96b85b98a4b8b66d660f3d52bd70718c0fa34d"
+  },
+  "tools/brand-voice-tone-guide/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "750a95cf0060173200cd73773598d34c480fc9f4"
+  },
+  "tools/card-sorting/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "2cd3109031b1388618c0b1344d99beef1eabc330"
+  },
+  "tools/channel-strategy-distribution-matrix/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "722cebce1998bf229a94143aa7a8a048d11d808b"
+  },
+  "tools/competitive-content-gap-analysis/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "047daac37ba849495843b70b6506ce6a585cf8a5"
+  },
+  "tools/content-audit-inventory/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "4569bc4fe93bf9da19ac43c56063ffb27c7ca5f7"
+  },
+  "tools/content-brief/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "82e8403e41cac38160bc173deb6f29c390e6a96f"
+  },
+  "tools/content-design-the-gov-uk-method/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "2b4e9683ee4894ce344a8d7ef5dc6bcd6c654510"
+  },
+  "tools/content-governance-plan/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "8e778147d221ae4cafbbe64d73ec6e5b90584585"
+  },
+  "tools/content-lifecycle-refresh-plan/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "91f5ab749c9510d5e43c315a18092a6c2794d6fe"
+  },
+  "tools/content-marketing-charter/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "f3442b0ef7b0459b59e14c2f69827a7250708787"
+  },
+  "tools/content-marketing-maturity-model/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "f7566001a3e9d98eef3dc0a01a6e2ad8d9c9b3a2"
+  },
+  "tools/content-matrix-content-map/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "b80d9a9de7787ae886466a47fd23dfde2c16d95c"
+  },
+  "tools/content-model-taxonomy/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "7c454f377b9e8aeb0b16002c10bcb4b0ed29989f"
+  },
+  "tools/content-pillars-themes/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "cde95783c7fb198cfd7487c4bd6180a8d8800866"
+  },
+  "tools/content-quality-scorecard/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "1ffb9cf3e9861b6f654199a9a79a4853f82a02c6"
+  },
+  "tools/content-swot/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "e19057b06cbc03cf1e83b4ba47f1f498a5ef46da"
+  },
+  "tools/content-workflow-process-map/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "57d0740c79f94185bd3eb9fc0c73c0090667fa8d"
+  },
+  "tools/contributor-freelancer-guidelines/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "3b865505a31dfed08d6d78e11a4e859a49df4ab7"
+  },
+  "tools/core-strategy-statement-messaging-framework/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "7e0cb7b0b08875a00fa6f795f41548ddadaa898c"
+  },
+  "tools/customer-journey-map/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "4099db2557ae640dae9d7c0c369f850abd6e1718"
+  },
+  "tools/editorial-calendar/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "d7de7b736839216e57b6f56a745c24f2179dd224"
+  },
+  "tools/editorial-mission-statement/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "cbb9ffaee2ff9b805d15064f2aea00bd0db4dea6"
+  },
+  "tools/editorial-style-guide/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "faeab48ba0ffd05cdb68bc8a2a89cc58aeac0218"
+  },
+  "tools/hero-hub-help/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "8816c26fb21ed3d9009030b8b20519175da2c8fa"
+  },
+  "tools/idea-backlog-prioritization-rice-ice/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "e9c817ada35dcdc1641443382a2706819ebee970"
+  },
+  "tools/information-architecture-sitemap/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "7fe5ac2e29b269695919325d930bf7f56f1eddbe"
+  },
+  "tools/jobs-to-be-done-value-prop-canvas/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "9f91836611faebb71a264741327def9eed226630"
+  },
+  "tools/keyword-map/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "0b809fbd89f6b781cf19d33c531095b157f0c5ba"
+  },
+  "tools/kpi-measurement-framework/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "8e8e6f40eafb9d300cb8e0e907c7345e3e8700d6"
+  },
+  "tools/point-of-view-pov/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "cb0cbbd825c45f6b29c995422cda50fa7a2c0337"
+  },
+  "tools/raci-matrix/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "89d94b391e3a69f58d0664edf210706993e36597"
+  },
+  "tools/repurposing-atomization-matrix/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "86deb60049a5ac2bbb96a3e1b527d27bd7a454ea"
+  },
+  "tools/rot-analysis/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "28e8f566c3f500e30cf374887fa15b254e40c54a"
+  },
+  "tools/see-think-do-care-stdc/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "c17be82b734a2654131349e1efa3c30d840bd3df"
+  },
+  "tools/the-content-strategy-quad/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "d0f7ebd82ff1f2a05a5dec1244aec9ba4cb847cd"
+  },
+  "tools/the-core-model/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "9da4c5bf9fc386746a4cdd244b9ccc1a750d8762"
+  },
+  "tools/the-peso-model/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "a6a28d8b6731367b308731562b7a6d02004d0529"
+  },
+  "tools/they-ask-you-answer-the-big-5/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "5d1099b9aeaa1ea05eafd8d5b850d4d54436f2be"
+  },
+  "tools/topic-clusters-pillar-map/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "867c1a7432a496cc4fd01dcde9c2d7cad2bc6432"
+  },
+  "tools/voice-of-customer-message-mining/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "10e272688b307fa5f21aa617525e201641b97d80"
+  },
+  "workspace/index.html": {
+    "iso": "2026-08-23T16:48:38-04:00",
+    "hash": "ad08ed31e208985f97a3d7836efba44f916214b3"
+  }
+}

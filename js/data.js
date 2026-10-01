@@ -1700,22 +1700,24 @@ window.WIZARD = {
       { id: 'structure',   label: 'A better-organized website or content structure' }
     ]
   ],
+  // Recommender weighting, ported from the October 2026 design handoff,
+  // which is the source of truth for these values.
   scores: {
-    start:       { charter:3, mission:3, quad:3, pillars:2, persona:2, jtbd:1, taya:1 },
-    unplanned:   { audit:3, rot:3, gap:2, swot:2, corestatement:2, charter:1, taya:1 },
-    broken:      { kpi:3, maturity:3, voc:2, audit:2, lifecycle:2, scorecard:2, rot:1 },
-    scaling:     { governance:3, raci:3, maturity:2, workflow:2, contributors:2, styleguide:1 },
-    audience:    { persona:3, journey:3, jtbd:3, stdc:3, voc:2, archetypes:1 },
-    message:     { corestatement:3, voicetone:3, archetypes:3, pillars:2, mission:2, contentdesign:1 },
+    start:       { charter:3, mission:3, maturity:2, quad:2, pillars:2, persona:2, jtbd:1 },
+    unplanned:   { audit:3, rot:3, gap:2, swot:2, corestatement:2, charter:1 },
+    broken:      { kpi:3, maturity:3, voc:2, peso:2, audit:2, lifecycle:2, scorecard:2 },
+    scaling:     { governance:3, raci:3, workflow:2, contributors:2, styleguide:1 },
+    audience:    { persona:3, journey:3, jtbd:3, stdc:3, voc:2, contentdesign:2 },
+    message:     { voicetone:3, archetypes:3, corestatement:2, pillars:2, mission:2 },
     execution:   { workflow:3, raci:3, brief:2, backlog:2, calendar:1 },
-    measure:     { kpi:3, scorecard:3, lifecycle:2 },
-    findability: { sitemap:3, cardsort:3, coremodel:3, model:2, contentdesign:2 },
-    topics:      { taya:3, clusters:3, keywords:3, gap:2, matrix:2, herohubhelp:1 },
-    doc:         { charter:3, mission:3, quad:2, corestatement:2, pillars:2 },
-    plan:        { calendar:3, matrix:3, peso:3, stdc:2, brief:2, clusters:2, herohubhelp:2 },
-    process:     { workflow:3, raci:2, brief:2, backlog:2, governance:1, peso:1 },
-    measurement: { kpi:3, scorecard:3, lifecycle:2 },
-    structure:   { sitemap:3, coremodel:3, cardsort:3, model:2, contentdesign:2 }
+    measure:     { kpi:3, scorecard:3, stdc:2, lifecycle:2 },
+    findability: { sitemap:3, cardsort:3, coremodel:3, contentdesign:2, model:2 },
+    topics:      { taya:3, clusters:3, keywords:3, herohubhelp:2, gap:2, matrix:2 },
+    doc:         { charter:3, mission:3, quad:2, corestatement:2, pillars:2, archetypes:1 },
+    plan:        { calendar:3, matrix:3, herohubhelp:2, peso:2, brief:2, clusters:2 },
+    process:     { workflow:3, raci:2, brief:2, backlog:2, governance:1 },
+    measurement: { kpi:3, scorecard:3, stdc:2, lifecycle:2 },
+    structure:   { sitemap:3, cardsort:3, contentdesign:3, coremodel:2, model:2 }
   }
 };
 

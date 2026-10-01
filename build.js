@@ -36,7 +36,38 @@ function loadData() {
   const sandbox = { window: {} };
   vm.createContext(sandbox);
   vm.runInContext(code, sandbox, { filename: 'data.js' });
+  // Updates + awards live in their own module but belong to the same data set.
+  const upd = fs.readFileSync(path.join(ROOT, 'js', 'updates.js'), 'utf8');
+  vm.runInContext(upd, sandbox, { filename: 'updates.js' });
   return sandbox.window;
+}
+
+/* ---------- tool detail headings (shared with the SPA) ---------- */
+// js/tooldetail.js owns the question-shaped headings and the section list,
+// so the prerendered page and the hydrated page cannot drift apart.
+let _toolDetail = null;
+function toolDetail() {
+  if (!_toolDetail) {
+    const sandbox = { window: {} };
+    vm.createContext(sandbox);
+    vm.runInContext(fs.readFileSync(path.join(ROOT, 'js', 'tooldetail.js'), 'utf8'), sandbox, { filename: 'tooldetail.js' });
+    _toolDetail = sandbox.window.CSLToolDetail;
+  }
+  return _toolDetail;
+}
+
+/* ---------- glossary tool-linking (shared with the SPA) ---------- */
+// js/linkify.js is the single source of truth for which phrases link where, so
+// the prerendered /terminology/ page carries exactly the links the SPA renders.
+let _linkify = null;
+function glossLinkify(data, text) {
+  if (!_linkify) {
+    const sandbox = { window: {} };
+    vm.createContext(sandbox);
+    vm.runInContext(fs.readFileSync(path.join(ROOT, 'js', 'linkify.js'), 'utf8'), sandbox, { filename: 'linkify.js' });
+    _linkify = sandbox.window.CSLLinkify;
+  }
+  return _linkify.linkify(String(text), data.TOOLS, esc, (t) => toolUrl(t));
 }
 
 /* ---------- small HTML helpers ---------- */
@@ -313,6 +344,7 @@ function siteHeaderStatic() {
     '    <a href="/">Library</a>',
     '    <a href="/terminology/">Terminology</a>',
     '    <a href="/recommend/">Tool Recommender</a>',
+    '    <a href="/updates/">Updates</a>',
     '    <a href="/faq/">FAQ</a>',
     '    <a href="/about/">About</a>',
     '  </nav>',
@@ -326,10 +358,13 @@ function siteFooterStatic() {
     '  <nav class="pr-footer-links">',
     '    <a href="/">Library</a>',
     '    <a href="/terminology/">Terminology</a>',
-    '    <a href="/faq/">FAQ</a>',
-    '    <a href="/about/">About</a>',
+    '    <a href="/workspace/">Workspace</a>',
     '    <a href="/recommend/">Tool Recommender</a>',
     '    <a href="/contact/">Contact</a>',
+    '    <a href="/updates/">Updates</a>',
+    '    <a href="/best-of-2026/">Best of 2026</a>',
+    '    <a href="/faq/">FAQ</a>',
+    '    <a href="/about/">About</a>',
     '    <a href="/privacy/">Privacy</a>',
     '    <button type="button" class="pr-cookie-prefs" onclick="openCookiePrefs()">Cookie preferences</button>',
     '  </nav>',
@@ -350,6 +385,10 @@ function bootScripts() {
     '<script src="/vendor/xlsx.full.min.js" defer></script>',
     '<script src="/js/data.js"></script>',
     '<script src="/js/icons.js"></script>',
+    '<script src="/js/linkify.js"></script>',
+    '<script src="/js/tooldetail.js"></script>',
+    '<script src="/js/updates.js"></script>',
+    '<script src="/js/plan.js"></script>',
     '<script src="/js/templates.js"></script>',
     '<script src="/js/consent.js" defer></script>',
     '<script src="/js/app.js"></script>',
@@ -449,11 +488,12 @@ function renderToolPage(data, tool) {
     '  <p class="pr-eyebrow"><a href="' + escAttr(catUrl(catKey)) + '">' + esc(catName) + '</a></p>',
     '  <h1>' + esc(tool.name) + '</h1>',
     // Answer-first: summary is the first paragraph after the H1.
-    '  <p class="pr-summary">' + esc(tool.summary) + '</p>',
+    '  <section id="what-is-it"><h2>' + esc(toolDetail().whatTitle(tool)) + '</h2>',
+    '  <p class="pr-summary">' + esc(tool.summary) + '</p></section>',
     '  <p class="pr-tagline"><strong>' + esc(tool.tagline) + '</strong></p>',
     tool.visual ? '  <p class="pr-visual">' + esc(tool.visual) + '</p>' : '',
-    whenTo ? '  <section><h2>When to use this</h2>\n    <ul>\n      ' + whenTo + '\n    </ul>\n  </section>' : '',
-    notes ? '  <section><h2>Notes</h2>\n    ' + notes + '\n  </section>' : '',
+    whenTo ? '  <section id="when-to-use"><h2>' + esc(toolDetail().whenTitle(tool)) + '</h2>\n    <ul>\n      ' + whenTo + '\n    </ul>\n  </section>' : '',
+    notes ? '  <section id="notes"><h2>Notes</h2>\n    ' + notes + '\n  </section>' : '',
     links ? '  <section><h2>Learn more &amp; sources</h2>\n    <ul class="pr-links">\n      ' + links + '\n    </ul>\n  </section>' : '',
     related ? '  <section><h2>Related tools</h2>\n    <ul class="pr-related">\n      ' + related + '\n    </ul>\n  </section>' : '',
     '</article>',
@@ -635,7 +675,7 @@ function renderTerminologyPage(data) {
     const id = termSlug(tm.term);
     const defs = (tm.defs || []).map((d) => {
       const by = d.by ? ' <cite>, ' + esc(d.by) + '</cite>' : '';
-      return '      <li>' + esc(d.text || d) + by + '</li>';
+      return '      <li>' + glossLinkify(data, d.text || d) + by + '</li>';
     }).join('\n');
     return [
       '  <section class="pr-term" id="' + id + '">',
@@ -735,7 +775,8 @@ function renderAboutPage(data) {
     '  <p>Content strategy has a real tools problem: the frameworks exist, but they live scattered across books, ' +
       'agency blogs, and paywalled courses. This library puts them in one place. Whether you hold a formal content ' +
       'strategy title or you are a marketer, founder, UX designer, or product manager who has inherited responsibility ' +
-      'for content, this reference is built for you.</p>',
+      'for content, this reference is built for you. New here and not sure where to begin? The ' +
+      '<a href="/faq/">FAQ</a> answers the questions that come up most.</p>',
     '  <p>Created by <a href="' + AUTHOR.url + '" rel="author">' + AUTHOR.name + '</a>. ' +
       'All content may be freely duplicated and used anywhere, without permission. This website is not monetized and there are no ads.</p>',
     '</div>',
@@ -842,7 +883,10 @@ function renderPrivacyPage() {
 /* ============================================================
    PAGE: contact (Web3Forms, no email address exposed)
    ============================================================ */
-function renderContactPage() {
+// The three contact topics are linkable URLs, so each gets a real page rather
+// than relying on the 404 shell. They all canonicalise to /contact/ so crawlers
+// treat them as one page.
+function renderContactPage(topic) {
   const canonical = SITE + '/contact/';
   const description = metaDescription('Contact the Content Strategy Library, questions, corrections, tool suggestions, or privacy/data requests. Goes straight to the maintainer.');
 
@@ -908,6 +952,125 @@ function renderAppShell(opts) {
 }
 
 /* ============================================================
+   PAGE: updates feed, update post, Best of 2026
+   ============================================================ */
+function fmtPostDate(d) {
+  // Noon so the date never slips across a time zone.
+  const [y, m, day] = d.split('-').map(Number);
+  return MONTHS[m - 1] + ' ' + day + ', ' + y;
+}
+
+function renderUpdatesFeed(data) {
+  const canonical = SITE + '/updates/';
+  const description = metaDescription('Short notes on what is new in the Content Strategy Library: new tools, changes to how it works, and announcements.');
+  const posts = data.UPDATES || [];
+  const items = posts.map((u) =>
+    '  <article class="pr-post">' +
+    '<h2><a href="/updates/' + escAttr(u.slug) + '/">' + esc(u.title) + '</a></h2>' +
+    '<p class="pr-post-date">' + esc(fmtPostDate(u.date)) + '</p>' +
+    '<p>' + esc(u.body[0]) + '</p></article>'
+  ).join('\n');
+
+  const body = [
+    siteHeaderStatic(),
+    '<div class="pr-legal">',
+    '  <nav class="pr-breadcrumb" aria-label="Breadcrumb"><a href="/">Library</a> &rsaquo; <span>Updates</span></nav>',
+    '  <h1>Updates</h1>',
+    '  <p class="pr-summary">Short notes on what is new in the library: new tools, changes to how it works, and announcements.</p>',
+    items,
+    '</div>',
+    siteFooterStatic()
+  ].join('\n');
+
+  const node = {
+    '@type': 'CollectionPage',
+    url: canonical,
+    name: 'Updates',
+    description: description,
+    isPartOf: { '@id': WEBSITE_ID },
+    dateModified: ISO_TOKEN
+  };
+  const crumbs = [{ name: 'Library', url: '/' }, { name: 'Updates', url: '/updates/' }];
+  return [
+    head({ title: 'Updates, Content Strategy Library', description, canonical, jsonld: [graph([node], crumbs)] }),
+    shellOpen(), body, bootScripts()
+  ].join('\n');
+}
+
+function renderUpdatePost(data, u) {
+  const canonical = SITE + '/updates/' + u.slug + '/';
+  const description = metaDescription(u.body[0]);
+  const paras = u.body.map((b) => '  <p>' + esc(b) + '</p>').join('\n');
+
+  const body = [
+    siteHeaderStatic(),
+    '<div class="pr-legal">',
+    '  <nav class="pr-breadcrumb" aria-label="Breadcrumb"><a href="/">Library</a> &rsaquo; <a href="/updates/">Updates</a> &rsaquo; <span>' + esc(u.title) + '</span></nav>',
+    '  <h1>' + esc(u.title) + '</h1>',
+    '  <p class="pr-post-date">' + esc(fmtPostDate(u.date)) + '</p>',
+    paras,
+    u.cta ? '  <p><a href="' + escAttr(u.cta.href) + '">' + esc(u.cta.label) + '</a></p>' : '',
+    '</div>',
+    siteFooterStatic()
+  ].filter((l) => l !== '').join('\n');
+
+  const node = {
+    '@type': 'Article',
+    headline: u.title,
+    description: description,
+    url: canonical,
+    mainEntityOfPage: canonical,
+    author: { '@id': PERSON_ID },
+    publisher: { '@id': ORG_ID },
+    datePublished: u.date + 'T07:00:00-04:00',
+    dateModified: ISO_TOKEN,
+    isPartOf: { '@id': WEBSITE_ID }
+  };
+  const crumbs = [{ name: 'Library', url: '/' }, { name: 'Updates', url: '/updates/' }, { name: u.title, url: '/updates/' + u.slug + '/' }];
+  return [
+    head({ title: u.title + ', Content Strategy Library', description, canonical, ogType: 'article', jsonld: [graph([node], crumbs)] }),
+    shellOpen(), body, bootScripts()
+  ].join('\n');
+}
+
+function renderAwardsPage(data) {
+  const canonical = SITE + '/best-of-2026/';
+  const description = metaDescription('Best of 2026: the resources, tools, and people that moved content strategy forward this year.');
+  const list = (items) => items.map((c) => '    <li><strong>' + esc(c.name) + '</strong>, ' + esc(c.desc) + '</li>').join('\n');
+
+  const body = [
+    siteHeaderStatic(),
+    '<div class="pr-legal">',
+    '  <nav class="pr-breadcrumb" aria-label="Breadcrumb"><a href="/">Library</a> &rsaquo; <span>Best of 2026</span></nav>',
+    '  <h1>Best of 2026</h1>',
+    '  <p class="pr-summary">The resources, tools, and people that moved content strategy forward this year. ' +
+      'Honorees are announced on this page.</p>',
+    '  <h2>Content strategy in practice</h2>',
+    '  <ul>', list(data.AWARD_CATEGORIES || []), '  </ul>',
+    '  <h2>Content strategy influencers</h2>',
+    '  <ul>', list(data.AWARD_INFLUENCERS || []), '  </ul>',
+    '  <h2>Make a nomination</h2>',
+    '  <p>Know something or someone that belongs on this list? <a href="/contact/nominate/">Tell us who and why</a>.</p>',
+    '</div>',
+    siteFooterStatic()
+  ].join('\n');
+
+  const node = {
+    '@type': 'CollectionPage',
+    url: canonical,
+    name: 'Best of 2026',
+    description: description,
+    isPartOf: { '@id': WEBSITE_ID },
+    dateModified: ISO_TOKEN
+  };
+  const crumbs = [{ name: 'Library', url: '/' }, { name: 'Best of 2026', url: '/best-of-2026/' }];
+  return [
+    head({ title: 'Best of 2026, Content Strategy Library', description, canonical, jsonld: [graph([node], crumbs)] }),
+    shellOpen(), body, bootScripts()
+  ].join('\n');
+}
+
+/* ============================================================
    CRAWL INFRASTRUCTURE
    ============================================================ */
 function buildSitemap(data) {
@@ -920,6 +1083,9 @@ function buildSitemap(data) {
   add('/', '1.0', null);
   data.CATEGORY_ORDER.forEach(([, key]) => add(catUrl(key), '0.7', pageOf(catUrl(key))));
   data.TOOLS.forEach((t) => add(toolUrl(t), '0.8', pageOf(toolUrl(t))));
+  add('/updates/', '0.6', pageOf('/updates/'));
+  (data.UPDATES || []).forEach((u) => add('/updates/' + u.slug + '/', '0.5', path.join('updates', u.slug, 'index.html')));
+  add('/best-of-2026/', '0.6', pageOf('/best-of-2026/'));
   add('/terminology/', '0.7', pageOf('/terminology/'));
   add('/faq/', '0.6', pageOf('/faq/'));
   add('/about/', '0.5', pageOf('/about/'));
@@ -1068,7 +1234,14 @@ function build() {
   w(path.join('faq', 'index.html'), renderFaqPage(data));
   w(path.join('about', 'index.html'), renderAboutPage(data));
   w(path.join('privacy', 'index.html'), renderPrivacyPage());
+
+  // Updates feed, one page per post, and the awards page.
+  w(path.join('updates', 'index.html'), renderUpdatesFeed(data));
+  (data.UPDATES || []).forEach((u) => w(path.join('updates', u.slug, 'index.html'), renderUpdatePost(data, u)));
+  w(path.join('best-of-2026', 'index.html'), renderAwardsPage(data));
   w(path.join('contact', 'index.html'), renderContactPage());
+  ['suggest-a-tool', 'nominate', 'other'].forEach((t) =>
+    w(path.join('contact', t, 'index.html'), renderContactPage(t)));
 
   // App-only views (interactive), noindex boot shells so deep links work + carry robots noindex
   w(path.join('recommend', 'index.html'), renderAppShell({

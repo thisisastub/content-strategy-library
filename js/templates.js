@@ -22,10 +22,43 @@
 
   // Shared brand footer for downloadable templates: a miniature yellow
   // mark, the wordmark, and a clickable library URL. No "Created by".
+  // The library icon, desaturated, for the footer of downloadable templates.
+  // Cached per session. Any failure (offline, CORS, tainted canvas) resolves
+  // to null and the footer falls back to the plain highlight square.
+  tplIcon() {
+    if (this._tplIconP === undefined) {
+      this._tplIconP = (async () => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.src = 'https://static.thenounproject.com/png/library-icon-8367955-512.png';
+        await img.decode();
+        const c = document.createElement('canvas'); c.width = 96; c.height = 96;
+        const x = c.getContext('2d');
+        x.filter = 'grayscale(1)';
+        x.globalAlpha = 0.5;
+        x.drawImage(img, 0, 0, 96, 96);
+        const dataUrl = c.toDataURL('image/png');
+        const bin = atob(dataUrl.split(',')[1]);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        return { bytes, dataUrl };
+      })().catch(() => null);
+    }
+    return this._tplIconP;
+  }
+
+  async tplIconPdf(doc) {
+    const ic = await this.tplIcon();
+    if (!ic) return null;
+    try { return await doc.embedPng(ic.bytes); } catch (e) { return null; }
+  }
+
   pdfBrandFooter(doc, page, PL, helv, bold, M, GRAY) {
     const { rgb, PDFName, PDFString } = PL;
-    const y = 26, sq = 8.5;
-    page.drawRectangle({ x: M, y: y - 1, width: sq, height: sq, color: rgb(0.969, 0.773, 0.192) });
+    const y = 26, sq = 9;
+    const icon = doc.__cslIcon || null;
+    if (icon) page.drawImage(icon, { x: M, y: y - 1.5, width: sq, height: sq });
+    else page.drawRectangle({ x: M, y: y - 1, width: sq, height: sq, color: rgb(0.969, 0.773, 0.192) });
     const mx = M + sq + 6;
     page.drawText(this.tplMark(), { x: mx, y, size: 8, font: bold, color: GRAY });
     const url = this.tplUrl();
@@ -515,6 +548,7 @@
     if (!spec) return;
     const { PDFDocument, StandardFonts, rgb, PDFName, PDFString } = PL;
     const doc = await PDFDocument.create();
+    doc.__cslIcon = await this.tplIconPdf(doc);
     const helv = await doc.embedFont(StandardFonts.Helvetica);
     const bold = await doc.embedFont(StandardFonts.HelveticaBold);
     const form = doc.getForm();
@@ -649,6 +683,7 @@
     if (!PL) { alert('The PDF generator is still loading. Please try again in a moment.'); return; }
     const { PDFDocument, StandardFonts, rgb, PDFName, PDFString } = PL;
     const doc = await PDFDocument.create();
+    doc.__cslIcon = await this.tplIconPdf(doc);
     const helv = await doc.embedFont(StandardFonts.Helvetica);
     const bold = await doc.embedFont(StandardFonts.HelveticaBold);
     const form = doc.getForm();
@@ -823,6 +858,7 @@
     if (!PL) { alert('The PDF generator is still loading. Please try again in a moment.'); return; }
     const { PDFDocument, StandardFonts, rgb, PDFName, PDFString } = PL;
     const doc = await PDFDocument.create();
+    doc.__cslIcon = await this.tplIconPdf(doc);
     const helv = await doc.embedFont(StandardFonts.Helvetica);
     const bold = await doc.embedFont(StandardFonts.HelveticaBold);
     const form = doc.getForm();
@@ -951,6 +987,7 @@
     if (!PL) { alert('The PDF generator is still loading. Please try again in a moment.'); return; }
     const { PDFDocument, StandardFonts, rgb, TextAlignment, PDFName, PDFString } = PL;
     const doc = await PDFDocument.create();
+    doc.__cslIcon = await this.tplIconPdf(doc);
     const helv = await doc.embedFont(StandardFonts.Helvetica);
     const bold = await doc.embedFont(StandardFonts.HelveticaBold);
     const form = doc.getForm();
@@ -1059,6 +1096,7 @@
     if (!PL) { alert('The PDF generator is still loading. Please try again in a moment.'); return; }
     const { PDFDocument, StandardFonts, rgb, PDFName, PDFString } = PL;
     const doc = await PDFDocument.create();
+    doc.__cslIcon = await this.tplIconPdf(doc);
     const helv = await doc.embedFont(StandardFonts.Helvetica);
     const bold = await doc.embedFont(StandardFonts.HelveticaBold);
     const form = doc.getForm();

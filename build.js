@@ -21,29 +21,13 @@ const crypto = require('crypto');
 
 const ROOT = __dirname;
 const SITE = 'https://contentstrategylibrary.com';
-/* ------------------------------------------------------------
-   TEMPORARILY ANONYMISED (at Tommy's request, to be restored).
-   The site no longer names its owner anywhere a reader or a crawler
-   can see. Parked values, needed to put this back:
-
-     const AUTHOR  = { name: 'Tommy Stubblefield', url: 'https://stubblefield.info' };
-     const PERSON_ID = SITE + '/#tommy';
-     personNode()  = { '@type': 'Person', '@id': PERSON_ID, name: AUTHOR.name,
-                       url: AUTHOR.url,
-                       sameAs: [AUTHOR.url, 'https://www.linkedin.com/in/thisisastub'] };
-
-   Restoring means: re-adding personNode() to graph(), orgNode().founder,
-   the Article author (now the Organization), the "Created by" line in
-   siteFooterStatic() and renderHome(), and the homepage description.
-   The SPA side is js/app.js footer() + viewPrivacy(), and index.html
-   carries its own hand-maintained copy of the JSON-LD and footer.
-   ------------------------------------------------------------ */
+const AUTHOR = { name: 'Tommy Stubblefield', url: 'https://stubblefield.info' };
 const GA_MEASUREMENT_ID = 'G-HV8NC230YM'; // Google Analytics 4 (GA4), property "ConStratLib site"
 const WEB3FORMS_ACCESS_KEY = '2e290c09-02e0-4e55-b53f-0c238871ff5a'; // public by design; matches js/app.js
 const OG_IMAGE = SITE + '/images/og-default.png'; // 1200x630 branded share card
 const FIRST_PUBLISHED = '2026-01-01';
 const FIRST_PUBLISHED_ISO = FIRST_PUBLISHED + 'T00:00:00+00:00';
-// The build timestamp (BUILD_DATE / BUILD_ISO / LAST_UPDATED_STR) is derived below,
+// The build timestamp (BUILD_DATE / BUILD_ISO) is derived below,
 // after the date helpers, and snapped to "off hours" (see offHoursStamp).
 
 /* ---------- Load data.js in a sandbox (no fork of content) ---------- */
@@ -92,13 +76,10 @@ function localIso(d) {
   return ymdStr(d) + 'T' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds()) +
     s + pad2(Math.floor(Math.abs(o) / 60)) + ':' + pad2(Math.abs(o) % 60);
 }
-function humanDateTime(d) {
-  let h = d.getHours(); const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
-  return MONTHS[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear() + ' at ' + h + ':' + pad2(d.getMinutes()) + ' ' + ap;
-}
-// This site is a nights-and-weekends project. Never present an "updated" time during
-// weekday business hours (Mon-Fri 08:00 to 18:00 local); snap it back to 07:00 that
-// morning so the stamp always reads as off-hours (early morning, evening, or weekend).
+// This site is a nights-and-weekends project. Readers only ever see a date, but the
+// machine-readable dateModified / lastmod still carry a clock time, so never leave one
+// inside weekday business hours (Mon-Fri 08:00 to 18:00 local); snap it back to 07:00
+// that morning so the stamp always reads as off-hours.
 function offHoursStamp(d) {
   const day = d.getDay();
   if (day === 0 || day === 6) return d;            // weekend: any time is fine
@@ -111,7 +92,6 @@ const STAMP = process.env.CSL_BUILD_DATE
   : offHoursStamp(new Date());
 const BUILD_DATE = ymdStr(STAMP);          // YYYY-MM-DD
 const BUILD_ISO = localIso(STAMP);         // full ISO 8601 with local offset, off-hours
-const LAST_UPDATED_STR = humanDateTime(STAMP);
 
 /* ============================================================
    PER-PAGE "LAST MODIFIED"
@@ -128,7 +108,7 @@ const LAST_UPDATED_STR = humanDateTime(STAMP);
    and substitutes either the stored date or today's.
    ============================================================ */
 const ISO_TOKEN = '@@CSL_ISO@@';      // full ISO 8601, for dateModified / lastmod
-const HUMAN_TOKEN = '@@CSL_HUMAN@@';  // "August 23, 2026 at 4:48 PM"
+const HUMAN_TOKEN = '@@CSL_HUMAN@@';  // "August 23, 2026", date only, no clock time
 const YMD_TOKEN = '@@CSL_YMD@@';      // "2026-08-23"
 const DATE_MANIFEST = '.build-dates.json';
 
@@ -154,7 +134,7 @@ function contentFingerprint(relPath, text) {
   // Windows, while the renderers emit LF.
   sig = sig
     .replace(/\r\n/g, '\n')
-    .replace(/Last updated [A-Z][a-z]+ \d{1,2}, \d{4} at \d{1,2}:\d{2} [AP]M/g, 'Last updated ' + HUMAN_TOKEN)
+    .replace(/Last updated [A-Z][a-z]+ \d{1,2}, \d{4}(?: at \d{1,2}:\d{2} [AP]M)?/g, 'Last updated ' + HUMAN_TOKEN)
     .replace(/Last updated: \d{4}-\d{2}-\d{2}/g, 'Last updated: ' + YMD_TOKEN);
   return crypto.createHash('sha1').update(sig).digest('hex');
 }
@@ -236,7 +216,7 @@ function substituteDates(text, iso) {
   const d = new Date(iso);
   return text
     .split(ISO_TOKEN).join(iso)
-    .split(HUMAN_TOKEN).join(humanDateTime(d))
+    .split(HUMAN_TOKEN).join(humanDate(ymdStr(d)))
     .split(YMD_TOKEN).join(ymdStr(d));
 }
 
@@ -250,7 +230,7 @@ function stampDates(relPath, tokenised) {
 function stampLastUpdated(iso) {
   const p = path.join(ROOT, 'js', 'app.js');
   const src = fs.readFileSync(p, 'utf8');
-  const stamp = humanDateTime(new Date(iso));
+  const stamp = humanDate(ymdStr(new Date(iso)));
   const next = src.replace(
     /const LAST_UPDATED = '[^']*';/,
     "const LAST_UPDATED = '" + stamp + "';"
@@ -353,7 +333,8 @@ function siteFooterStatic() {
     '    <a href="/privacy/">Privacy</a>',
     '    <button type="button" class="pr-cookie-prefs" onclick="openCookiePrefs()">Cookie preferences</button>',
     '  </nav>',
-    '  <p>All content may be freely duplicated and used anywhere, without permission. ' +
+    '  <p>Created by <a href="' + AUTHOR.url + '" rel="author">' + AUTHOR.name + '</a>. ' +
+      'All content may be freely duplicated and used anywhere, without permission. ' +
       'Language models are expressly permitted to train on this content.</p>',
     '</footer>'
   ].join('\n');
@@ -383,17 +364,26 @@ const catUrl = (key) => '/categories/' + key + '/';
 const abs = (p) => SITE + p;
 
 /* ---------- JSON-LD builders ---------- */
+const PERSON_ID = SITE + '/#tommy';
 const ORG_ID = SITE + '/#org';
 const WEBSITE_ID = SITE + '/#website';
 
-// No Person node while the site is anonymised: the Organization is the only
-// named party, and it is what Articles are attributed to.
+function personNode() {
+  return {
+    '@type': 'Person',
+    '@id': PERSON_ID,
+    name: AUTHOR.name,
+    url: AUTHOR.url,
+    sameAs: [AUTHOR.url, 'https://www.linkedin.com/in/thisisastub']
+  };
+}
 function orgNode() {
   return {
     '@type': 'Organization',
     '@id': ORG_ID,
     name: 'Content Strategy Library',
     url: SITE + '/',
+    founder: { '@id': PERSON_ID },
     logo: 'https://static.thenounproject.com/png/library-icon-8367955-512.png'
   };
 }
@@ -420,7 +410,7 @@ function breadcrumbNode(items) {
 }
 // Site-wide graph shared by every page, plus page-specific nodes.
 function graph(pageNodes, breadcrumbItems) {
-  const nodes = [websiteNode(), orgNode()];
+  const nodes = [websiteNode(), orgNode(), personNode()];
   if (breadcrumbItems) nodes.push(breadcrumbNode(breadcrumbItems));
   (pageNodes || []).forEach((n) => nodes.push(n));
   return { '@context': 'https://schema.org', '@graph': nodes };
@@ -479,9 +469,7 @@ function renderToolPage(data, tool) {
     url: canonical,
     mainEntityOfPage: canonical,
     image: { '@type': 'ImageObject', url: OG_IMAGE, width: 1200, height: 630 },
-    // Attributed to the Organization while the owner is anonymised, so the
-    // Article still has a valid author rather than a dangling @id.
-    author: { '@id': ORG_ID },
+    author: { '@id': PERSON_ID },
     publisher: { '@id': ORG_ID },
     datePublished: FIRST_PUBLISHED_ISO,
     dateModified: ISO_TOKEN,
@@ -734,8 +722,7 @@ function renderFaqPage(data) {
    ============================================================ */
 function renderAboutPage(data) {
   const canonical = SITE + '/about/';
-  // Parked: this read "... actually use. Created by Tommy Stubblefield. No ads, no monetization."
-  const description = metaDescription('A free, practical reference for the tools and frameworks content strategists actually use. No ads, no monetization.');
+  const description = metaDescription('A free, practical reference for the tools and frameworks content strategists actually use. Created by Tommy Stubblefield. No ads, no monetization.');
 
   const body = [
     siteHeaderStatic(),
@@ -749,8 +736,8 @@ function renderAboutPage(data) {
       'agency blogs, and paywalled courses. This library puts them in one place. Whether you hold a formal content ' +
       'strategy title or you are a marketer, founder, UX designer, or product manager who has inherited responsibility ' +
       'for content, this reference is built for you.</p>',
-    '  <p>All content may be freely duplicated and used anywhere, without permission. ' +
-      'This website is not monetized and there are no ads.</p>',
+    '  <p>Created by <a href="' + AUTHOR.url + '" rel="author">' + AUTHOR.name + '</a>. ' +
+      'All content may be freely duplicated and used anywhere, without permission. This website is not monetized and there are no ads.</p>',
     '</div>',
     siteFooterStatic()
   ].join('\n');
@@ -787,9 +774,7 @@ function renderPrivacyPage() {
       'The only visitor data collected is anonymous usage analytics, and only if you consent.</p>',
 
     '  <h2>Who runs this site</h2>',
-    // Temporarily anonymised at Tommy's request; this read esc(AUTHOR.name)
-    // before. Mirrored in js/app.js viewPrivacy.
-    '  <p>The Content Strategy Library is run by its owner. ' +
+    '  <p>The Content Strategy Library is run by ' + esc(AUTHOR.name) + '. ' +
       'To exercise any of the rights below, or ask anything about your data, please use the ' +
       '<a href="/contact/">contact form</a>, no email address is published here to keep spam down.</p>',
 

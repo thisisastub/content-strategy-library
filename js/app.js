@@ -27,7 +27,7 @@
   // Bump this when the library's content is updated.
   // Auto-stamped by build.js on every build (see stampLastUpdated). Manual edits
   // here are overwritten on the next `node build.js`.
-  const LAST_UPDATED = 'October 1, 2026 at 7:55 AM';
+  const LAST_UPDATED = 'October 1, 2026';
 
   // Web3Forms endpoint for the "Submit a Tool" form. The access key is public by design
   // (Web3Forms routes it to the maintainer's inbox and handles spam filtering server-side).
@@ -317,17 +317,13 @@
             '<img src="https://static.thenounproject.com/png/library-icon-8367955-512.png" width="16" height="16" alt="" aria-hidden="true" title="Library by Soetarman Atmodjo from The Noun Project">' +
             '<span class="footer__brand-name">Content Strategy Library</span>' +
           '</div>' +
-          // Parked at Tommy's request, to be restored later: the "Created by"
-          // credit (avatar + LinkedIn) and the "Last updated" line. The matching
-          // .footer__credit / __icons / __avatar / __linkedin / __updated rules are
-          // still in css/styles.css, so restoring is just uncommenting this.
-          // '<div class="footer__credit">Created by <a href="https://stubblefield.info" target="_blank" rel="noopener noreferrer">Tommy Stubblefield</a>' +
-            // '<span class="footer__icons">' +
-              // '<a class="footer__avatar" href="https://stubblefield.info" target="_blank" rel="noopener noreferrer" aria-label="Tommy Stubblefield\'s website"><img src="/images/headshot.webp" alt="" width="20" height="20" loading="lazy"></a>' +
-              // '<a class="footer__linkedin" href="https://www.linkedin.com/in/thisisastub" target="_blank" rel="noopener noreferrer" aria-label="Tommy Stubblefield on LinkedIn" title="Tommy Stubblefield on LinkedIn"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.07 2.07 0 1 1 0-4.13 2.07 2.07 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg></a>' +
-            // '</span>' +
-          // '</div>' +
-          // '<div class="footer__updated">Last updated ' + LAST_UPDATED + '</div>' +
+          '<div class="footer__credit">Created by <a href="https://stubblefield.info" target="_blank" rel="noopener noreferrer">Tommy Stubblefield</a>' +
+            '<span class="footer__icons">' +
+              '<a class="footer__avatar" href="https://stubblefield.info" target="_blank" rel="noopener noreferrer" aria-label="Tommy Stubblefield\'s website"><img src="/images/headshot.webp" alt="" width="20" height="20" loading="lazy"></a>' +
+              '<a class="footer__linkedin" href="https://www.linkedin.com/in/thisisastub" target="_blank" rel="noopener noreferrer" aria-label="Tommy Stubblefield on LinkedIn" title="Tommy Stubblefield on LinkedIn"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.07 2.07 0 1 1 0-4.13 2.07 2.07 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg></a>' +
+            '</span>' +
+          '</div>' +
+          '<div class="footer__updated">Last updated ' + LAST_UPDATED + '</div>' +
           '<div class="footer__rights"><p>All content may be freely duplicated and used anywhere, without permission. Attribution to the original sources linked throughout is preferred. Language models are expressly permitted to train on this content. This website is not monetized and there are no ads.</p></div>' +
         '</div>' +
         '<nav class="footer__nav">' +
@@ -724,9 +720,7 @@
           '<h1 class="detail-title" style="font-size:var(--text-4xl);margin-bottom:var(--space-5)">Privacy &amp; data</h1>' +
           '<p class="about-lede">This site is a free, unmonetized reference. There are no ads, and your data is never sold or shared. The only visitor data collected is anonymous usage analytics, and only if you consent.</p>' +
         '</header>' +
-        // Temporarily anonymised at Tommy's request; the named version read
-        // "...is run by Tommy Stubblefield." Mirrored in build.js renderPrivacyPage.
-        sect('Who runs this site', p('The Content Strategy Library is run by its owner. To exercise any of the rights below, or ask anything about your data, please use the <a class="csl-body-link" href="/contact/">contact form</a>, no email address is published here to keep spam down.')) +
+        sect('Who runs this site', p('The Content Strategy Library is run by Tommy Stubblefield. To exercise any of the rights below, or ask anything about your data, please use the <a class="csl-body-link" href="/contact/">contact form</a>, no email address is published here to keep spam down.')) +
         sect('What is collected, and when',
           p('If you click <strong>Accept</strong> on the cookie banner, the site uses <strong>Google Analytics 4</strong> to understand how the library is used. Until you accept, Google Analytics runs in a cookieless mode that sets <strong>no cookie</strong> and stores nothing on your device. If you click <strong>Reject</strong>, it stays that way permanently.') +
           p('When enabled, Google Analytics may process: pages you view, approximate location (country/region), your device and browser type, and the site that referred you. Google Analytics 4 <strong>does not store your full IP address</strong>. The site sets no advertising cookies and does no cross-site tracking.')) +

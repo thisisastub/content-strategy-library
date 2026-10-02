@@ -4,6 +4,7 @@
    DESIGN TOKENS
    ============================================================ */
 :root {
+  --bg-hero-h: 345px;   /* header photo: fades out ~400px down the page */
   /* ─── Ink scale, warm neutrals ──────────────── */
   --ink-25:   #F8F7F2;
   --ink-50:   #F0EFE8;
@@ -196,7 +197,9 @@ a {
 .bg-hero {
   position: absolute;
   top: 0;
-  bottom: 0;
+  /* One fade length for every page, not the header's own height, so the
+     photo fades out at the same distance down the page everywhere. */
+  height: var(--bg-hero-h);
   left: 50%;
   width: 100vw;
   transform: translate3d(-50%, var(--hero-anchor, 0px), 0);
@@ -2361,3 +2364,8 @@ select.input { cursor: pointer; padding: 0 12px; }
   color: var(--text-muted);
 }
 .survey-embed.is-loaded .survey-embed__loading { display: none; }
+
+/* Phones: every header photo fades at the home page's phone length. */
+@media (max-width: 719px) {
+  :root { --bg-hero-h: 607px; }
+}

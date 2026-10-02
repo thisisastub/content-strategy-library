@@ -30,7 +30,7 @@
       this._tplIconP = (async () => {
         const img = new Image();
         img.crossOrigin = 'anonymous';
-        img.src = 'https://static.thenounproject.com/png/library-icon-8367955-512.png';
+        img.src = '/images/library-icon.png';
         await img.decode();
         const c = document.createElement('canvas'); c.width = 96; c.height = 96;
         const x = c.getContext('2d');

@@ -295,7 +295,7 @@ function head(opts) {
       "script-src \'self\' \'unsafe-inline\' \'unsafe-eval\' https://www.googletagmanager.com",
       "style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com",
       "font-src \'self\' https://fonts.gstatic.com",
-      "img-src \'self\' data: https://static.thenounproject.com https://www.google-analytics.com https://www.googletagmanager.com",
+      "img-src \'self\' data: https://www.google-analytics.com https://www.googletagmanager.com",
       "connect-src \'self\' https://api.web3forms.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com",
       "form-action \'self\' https://api.web3forms.com",
       "base-uri \'self\'",
@@ -322,7 +322,7 @@ function head(opts) {
     '  <meta name="twitter:card" content="summary_large_image">',
     '  <meta name="twitter:image" content="' + OG_IMAGE + '">',
     '  <meta name="twitter:image:alt" content="Content Strategy Library">',
-    '  <link rel="icon" type="image/png" href="https://static.thenounproject.com/png/library-icon-8367955-512.png">',
+    '  <link rel="icon" type="image/png" href="/images/library-icon.png">',
     '  <link rel="stylesheet" href="/css/styles.css">',
     ldTags ? '  ' + ldTags : '',
     '</head>'
@@ -423,7 +423,7 @@ function orgNode() {
     name: 'Content Strategy Library',
     url: SITE + '/',
     founder: { '@id': PERSON_ID },
-    logo: 'https://static.thenounproject.com/png/library-icon-8367955-512.png'
+    logo: SITE + '/images/library-icon.png'
   };
 }
 function websiteNode() {

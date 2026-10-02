@@ -452,7 +452,7 @@
 
   function nav() {
     const cur = navCurrent();
-    const libIcon ='<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true" style="display:block"><defs><filter id="hl-icon"><feFlood flood-color="#16160E" result="c"></feFlood><feComposite in="c" in2="SourceAlpha" operator="in"></feComposite></filter></defs><image href="https://static.thenounproject.com/png/library-icon-8367955-512.png" x="0" y="0" width="22" height="22" filter="url(#hl-icon)"></image></svg>';
+    const libIcon ='<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true" style="display:block"><defs><filter id="hl-icon"><feFlood flood-color="#16160E" result="c"></feFlood><feComposite in="c" in2="SourceAlpha" operator="in"></feComposite></filter></defs><image href="/images/library-icon.png" x="0" y="0" width="22" height="22" filter="url(#hl-icon)"></image></svg>';
     const burger = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="nav__icon-bars" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>' +
       '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="nav__icon-close" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>';
     return '' +
@@ -478,7 +478,7 @@
       '<footer class="footer"><div class="footer__inner">' +
         '<div>' +
           '<div class="footer__brand-row">' +
-            '<img src="https://static.thenounproject.com/png/library-icon-8367955-512.png" width="16" height="16" alt="" aria-hidden="true" title="Library by Soetarman Atmodjo from The Noun Project">' +
+            '<img src="/images/library-icon.png" width="16" height="16" alt="" aria-hidden="true" title="Library by Soetarman Atmodjo from The Noun Project">' +
             '<span class="footer__brand-name">Content Strategy Library</span>' +
           '</div>' +
           '<div class="footer__credit">Created by <a href="https://stubblefield.info" target="_blank" rel="noopener noreferrer">Tommy Stubblefield</a>' +
@@ -644,7 +644,7 @@
   // ── IMAGERY CREDITS ──
   // Every photograph used on the site, with where it appears and who took it.
   const CREDITS = [
-    { thumb: 'https://static.thenounproject.com/png/library-icon-8367955-512.png', contain: true,
+    { thumb: '/images/library-icon.png', contain: true,
       where: 'Library icon, top nav', go: 'top',
       who: 'Soetarman Atmodjo', site: 'The Noun Project',
       url: 'https://thenounproject.com/icon/library-8367955/' },

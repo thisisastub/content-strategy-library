@@ -499,7 +499,12 @@
           '<a class="soft-highlight" href="/contact/">Contact</a>' +
           '<a class="soft-highlight" href="/updates/">Updates</a>' +
           '<a class="soft-highlight" href="/best-of-2026/">Best of 2026</a>' +
-          '<a class="footer__survey" href="/survey/">Survey</a>' +
+          // mountNewFlags fades the flag in once the footer is on screen; the
+          // CSS runs the highlighter sweep on the word at the same moment.
+          '<span class="footer__survey-wrap">' +
+            '<a class="soft-highlight footer__survey" href="/survey/">Survey</a>' +
+            '<span class="new-flag footer__flag" style="--nf-delay:200ms">ACTIVE</span>' +
+          '</span>' +
           '<a class="soft-highlight" href="/faq/">FAQ</a>' +
           '<a class="soft-highlight" href="/about/">About</a>' +
           '<button type="button" class="soft-highlight footer__linkbtn" data-action="credits-open">Imagery credits</button>' +

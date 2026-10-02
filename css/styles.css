@@ -2305,18 +2305,36 @@ select.input { cursor: pointer; padding: 0 12px; }
   .survey-facts li { min-width: calc(50% - var(--space-3)); }
 }
 
-/* Footer: the survey link wears the highlighter, so it reads as yellow
-   without yellow text (which would be unreadable on the light footer). */
-.footer__nav a.footer__survey {
-  justify-self: start;
+/* Footer: the Survey link is a normal link with an "ACTIVE" flag beside it.
+   200ms after the footer scrolls into view the flag fades in and the word
+   gets one highlighter pass: yellow sweeps in from the left, then clears
+   out to the right. */
+.footer__survey-wrap { display: inline-flex; align-items: center; gap: var(--space-2); justify-self: start; }
+.footer__nav a.footer__survey { position: relative; z-index: 0; }
+.footer__survey::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
   background: var(--highlight);
-  color: var(--ink-950);
-  font-weight: var(--weight-semibold);
-  transition: background-color 140ms ease;
+  transform: scaleX(0);
+  transform-origin: left center;
+  pointer-events: none;
 }
-.footer__nav a.footer__survey:hover,
-.footer__nav a.footer__survey:focus-visible { background: #e8b820; color: var(--ink-950); }
-.prerender-shell .pr-survey-link { background: var(--highlight); color: var(--ink-950); font-weight: 600; padding: 0 4px; border-radius: var(--radius-sm); }
+.footer__survey-wrap:has(.new-flag.is-in) .footer__survey::before {
+  animation: footerSweep 1.6s cubic-bezier(.4, 0, .2, 1) 200ms both;
+}
+@keyframes footerSweep {
+  0%   { transform: scaleX(0); transform-origin: left center; }
+  40%  { transform: scaleX(1); transform-origin: left center; }
+  60%  { transform: scaleX(1); transform-origin: right center; }
+  100% { transform: scaleX(0); transform-origin: right center; }
+}
+.footer__flag { line-height: 1.4; }
+@media (prefers-reduced-motion: reduce) {
+  .footer__survey-wrap:has(.new-flag.is-in) .footer__survey::before { animation: none; }
+}
 
 /* ── Smooth hero drift ──
    Where the browser supports scroll-driven animations, the drift runs on the

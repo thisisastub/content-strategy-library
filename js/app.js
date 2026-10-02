@@ -57,7 +57,7 @@
     copiedAnchor: '',
     copiedText: '',
     wsCustomizeOpen: false,
-    stripOpen: 1,         // homepage filmstrip: open tile (Tool Recommender)
+    stripOpen: 0,         // homepage filmstrip: open tile (the survey)
     surveyOpen: false,    // survey page: form revealed by "Take the survey"
     // Logo lives in memory only, never in localStorage.
     wsLogo: null,
@@ -659,7 +659,7 @@
     { thumb: '/images/heroes/updates.webp', where: 'Updates header', go: '/updates/',
       who: 'tama66', site: 'Pixabay',
       url: 'https://pixabay.com/photos/typewriter-write-old-vintage-8622984/' },
-    { thumb: '/images/heroes/faq.webp', where: 'FAQ and Survey headers', go: '/faq/',
+    { thumb: '/images/heroes/faq.webp', where: 'FAQ and Survey headers, homepage Survey tile', go: '/faq/',
       who: 'Pavel Danilyuk', site: 'Pexels',
       url: 'https://www.pexels.com/photo/a-woman-in-white-shirt-raising-her-hand-8761544/' },
     { thumb: '/images/heroes/about.webp', where: 'About header', go: '/about/',
@@ -901,7 +901,7 @@
   }
 
   // ── Home filmstrip ──
-  // Three photo tiles beside the library title (Claude Design option 1d). One
+  // Four photo tiles beside the library title (Claude Design option 1d). One
   // is open at a time. The strip moves to the next tile every 7 seconds, and
   // holds still while the pointer is over it, while a tile has keyboard focus,
   // when it is scrolled out of view, when the tab is hidden, and always under
@@ -914,6 +914,7 @@
   // The Best of 2026 tile plays the clapping clip and confetti while open.
   // The Workspace photo is a placeholder (the Terminology header image).
   const STRIP = [
+    { href: '/survey/', label: 'Practitioner survey', title: 'Take the survey', img: '/images/strip/survey.webp', pos: 'center 22%' },
     { href: '/workspace/', label: 'Workspace', title: 'Build your plan', img: '/images/strip/workspace.webp', pos: 'center 50%' },
     { href: '/recommend/', label: 'Tool Recommender', title: 'Find your tools', img: '/images/strip/recommender.webp', pos: 'center 45%' },
     { href: '/best-of-2026/', label: 'Best of 2026', title: 'Nominations open', svg: '/images/best-of-2026-badge.svg', video: '/images/best-of-2026-hero.mp4' }

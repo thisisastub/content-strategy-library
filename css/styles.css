@@ -2048,7 +2048,7 @@ select.input { cursor: pointer; padding: 0 12px; }
   text-decoration: none;
   transition: flex-grow 500ms cubic-bezier(.4, 0, .2, 1);
 }
-.strip-tile.is-open { flex-grow: 5; }
+.strip-tile.is-open { flex-grow: 8; }
 .strip-tile__art {
   position: absolute;
   inset: 0;
@@ -2199,6 +2199,7 @@ select.input { cursor: pointer; padding: 0 12px; }
    in from the right and snap to the page gutter. */
 @media (max-width: 719px), (hover: none) {
   .index-header--split { grid-template-columns: minmax(0, 1fr); gap: var(--space-8); }
+  .index-header--split .strip { order: -1; }
   .strip {
     height: auto;
     gap: 12px;

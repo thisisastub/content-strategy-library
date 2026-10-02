@@ -1441,8 +1441,8 @@
         '<div class="awards__hero" aria-hidden="true">' +
           '<video src="/images/best-of-2026-hero.mp4" autoplay muted loop playsinline></video>' +
           '<div class="awards__scrim"></div>' +
-          '<canvas class="awards__confetti" data-confetti aria-hidden="true"></canvas>' +
         '</div>' +
+        '<canvas class="awards__confetti" data-confetti aria-hidden="true"></canvas>' +
         '<div class="shell-md">' +
           '<header class="awards__header">' +
             '<div class="awards__headline">' +

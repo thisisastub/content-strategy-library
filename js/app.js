@@ -919,7 +919,7 @@
   // The Best of 2026 tile plays the clapping clip and confetti while open.
   // The Workspace photo is a placeholder (the Terminology header image).
   const STRIP = [
-    { href: '/survey/', label: 'Practitioner survey', title: 'Take the survey', img: '/images/strip/survey.webp', pos: 'center 22%' },
+    { href: '/survey/', label: 'Practitioner survey', title: 'Take the survey', img: '/images/strip/survey.webp', pos: 'center top' },
     { href: '/workspace/', label: 'Workspace', title: 'Build your plan', img: '/images/strip/workspace.webp', pos: 'center 50%' },
     { href: '/recommend/', label: 'Tool Recommender', title: 'Find your tools', img: '/images/strip/recommender.webp', pos: 'center 45%' },
     { href: '/best-of-2026/', label: 'Best of 2026', title: 'Nominations open', svg: '/images/best-of-2026-badge.svg', video: '/images/best-of-2026-hero.mp4' }

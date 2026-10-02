@@ -1575,7 +1575,7 @@ select.input { cursor: pointer; padding: 0 12px; }
 .footer__linkedin svg { display: block; }
 .footer__rights { max-width: 48ch; margin-top: var(--space-5); }
 .footer__rights p { font-size: var(--text-sm); line-height: var(--leading-normal); color: var(--text-muted); margin: 0; }
-.footer__nav { display: grid; grid-template-columns: repeat(2, max-content); gap: var(--space-3) var(--space-16); align-content: start; }
+.footer__nav { display: grid; grid-template-columns: repeat(2, max-content); gap: var(--space-3) var(--space-16); align-content: start; justify-items: start; }
 /* No transition here on purpose: these links carry .soft-highlight, and a
    `transition: color` at this specificity would beat it and kill the sweep. */
 .footer__nav a, .footer__nav .footer__linkbtn {

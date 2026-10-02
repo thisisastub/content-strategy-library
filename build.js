@@ -925,16 +925,12 @@ function renderSurveyPage() {
 
     '  <h2>Before you start</h2>',
     '  <ul>',
-    li('<strong>Voluntary.</strong> Taking part is up to you, and you can stop at any time.'),
-    li('<strong>Anonymous.</strong> The survey never asks for your name or your employer’s name.'),
-    li('<strong>Reported only in aggregate.</strong> Results are shared as totals and percentages across everyone who answered. ' +
-      'Individual answers are never published, and no group small enough to single someone out is reported on its own.'),
-    li('<strong>Email is optional.</strong> At the end you can leave your email to get the results. It is used once, to send you ' +
-      'the report. You only hear from us beyond that if you tick the news and updates box, and you can unsubscribe at any time.'),
-    li('<strong>Never sold.</strong> Your answers and your email address are never sold, rented, or shared. There is no sponsor.'),
-    li('<strong>Who sees it.</strong> Only the library’s maintainer. Responses are collected by Tally, a form service based in ' +
-      'Belgium that stores data in Europe. The <a href="/privacy/">privacy page</a> has the details.'),
-    li('<strong>18 and over.</strong> The survey is meant for working professionals aged 18 or older.'),
+    li('The survey is <strong>anonymous</strong>: it never asks for your name or your employer’s name.'),
+    li('Results are <strong>reported only in aggregate</strong>, as totals and percentages across everyone who answered. Individual answers are never published, and no group small enough to single someone out is reported on its own.'),
+    li('Leaving your <strong>email is optional</strong>. If you do, it is used once, to send you the report, and you only hear from us again if you tick the news and updates box. You can unsubscribe at any time.'),
+    li('Your answers and your email address are <strong>never sold</strong>, rented, or shared, and there is no sponsor.'),
+    li('Individual responses are seen <strong>only by the library’s maintainer</strong>. They are collected by Tally, a form service based in Belgium that stores data in Europe, and the <a href="/privacy/">privacy page</a> has the details.'),
+    li('The survey is meant for working professionals <strong>18 and over</strong>.'),
     '  </ul>',
     '  <p>Questions about the survey? Use the <a href="/contact/other/">contact form</a>.</p>',
     '</div>',

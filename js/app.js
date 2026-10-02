@@ -1822,14 +1822,13 @@
     const facts = [['2 min', 'to finish'], ['9', 'short questions'], ['No', 'names asked for'], ['Free', 'results for everyone']]
       .map((f) => '<li><strong>' + f[0] + '</strong><span>' + f[1] + '</span></li>').join('');
     const fine = [
-      ['Voluntary.', 'Taking part is up to you, and you can stop at any time.'],
-      ['Anonymous.', 'The survey never asks for your name or your employer&rsquo;s name.'],
-      ['Reported only in aggregate.', 'Results are shared as totals and percentages across everyone who answered. Individual answers are never published, and no group small enough to single someone out is reported on its own.'],
-      ['Email is optional.', 'At the end you can leave your email to get the results. It is used once, to send you the report. You only hear from us beyond that if you tick the news and updates box, and you can unsubscribe at any time.'],
-      ['Never sold.', 'Your answers and your email address are never sold, rented, or shared. There is no sponsor.'],
-      ['Who sees it.', 'Only the library&rsquo;s maintainer. Responses are collected by Tally, a form service based in Belgium that stores data in Europe. The <a class="csl-body-link" href="/privacy/">privacy page</a> has the details.'],
-      ['18 and over.', 'The survey is meant for working professionals aged 18 or older.']
-    ].map((f) => '<li><strong>' + f[0] + '</strong> ' + f[1] + '</li>').join('');
+      'The survey is <strong>anonymous</strong>: it never asks for your name or your employer&rsquo;s name.',
+      'Results are <strong>reported only in aggregate</strong>, as totals and percentages across everyone who answered. Individual answers are never published, and no group small enough to single someone out is reported on its own.',
+      'Leaving your <strong>email is optional</strong>. If you do, it is used once, to send you the report, and you only hear from us again if you tick the news and updates box. You can unsubscribe at any time.',
+      'Your answers and your email address are <strong>never sold</strong>, rented, or shared, and there is no sponsor.',
+      'Individual responses are seen <strong>only by the library&rsquo;s maintainer</strong>. They are collected by Tally, a form service based in Belgium that stores data in Europe, and the <a class="csl-body-link" href="/privacy/">privacy page</a> has the details.',
+      'The survey is meant for working professionals <strong>18 and over</strong>.'
+    ].map((f) => '<li>' + f + '</li>').join('');
     const open = !!state.surveyOpen;
     return shell(
       '<div class="shell-md survey">' +

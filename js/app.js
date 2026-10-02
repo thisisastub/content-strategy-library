@@ -1271,6 +1271,85 @@
     );
   }
 
+  // ── BADGE + CONFETTI ──
+  // The badge SVG names Plus Jakarta Sans but carries no @font-face. Loaded
+  // through <img> it renders in an isolated document with no access to the
+  // page's fonts, so the lettering falls back. Inlining it into the DOM lets
+  // it inherit the font the rest of the page already loaded.
+  const svgCache = {};
+  function inlineSvgs(root) {
+    (root || document).querySelectorAll('[data-inline-svg]:not([data-svg-done])').forEach((el) => {
+      const src = el.getAttribute('data-inline-svg');
+      el.setAttribute('data-svg-done', '');
+      const put = (text) => {
+        el.innerHTML = text;
+        const svg = el.querySelector('svg');
+        if (svg) { svg.style.display = 'block'; svg.setAttribute('aria-hidden', 'true'); }
+      };
+      if (svgCache[src]) { put(svgCache[src]); return; }
+      fetch(src)
+        .then((r) => (r.ok ? r.text() : Promise.reject(new Error(r.status))))
+        .then((t) => { svgCache[src] = t; put(t); })
+        .catch(() => {
+          // Fall back to the plain image rather than showing nothing.
+          el.innerHTML = '<img src="' + esc(src) + '" alt="" style="display:block;width:100%;height:100%;object-fit:contain">';
+        });
+    });
+  }
+
+  // Falling confetti over the awards artwork: runs once for 8s, then fades out
+  // over 1.2s. Skipped entirely under prefers-reduced-motion.
+  function runConfetti(cv) {
+    if (!cv || cv._ran) return;
+    cv._ran = true;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const ctx = cv.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const W = () => cv.clientWidth;
+    const H = () => cv.clientHeight;
+    const size = () => { cv.width = W() * dpr; cv.height = H() * dpr; };
+    size();
+    if (!W() || !H()) { cv._ran = false; return; }
+    const cols = ['#F7C531', '#C99A14', '#F8F7F2', '#E8D9A8'];
+    const N = Math.min(90, Math.round(W() / 14));
+    const mk = (y) => ({
+      x: Math.random() * W(), y: y,
+      vy: 0.5 + Math.random() * 0.9, vx: (Math.random() - 0.5) * 0.4,
+      r: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.12,
+      w: 4 + Math.random() * 4, h: 6 + Math.random() * 6,
+      c: cols[Math.floor(Math.random() * cols.length)], ph: Math.random() * 6.28
+    });
+    const ps = Array.from({ length: N }, () => mk(-Math.random() * Math.min(H(), 600)));
+    const t0 = performance.now(), STOP = 8000, FADE = 1200;
+    const tick = (now) => {
+      if (!cv.isConnected) return;
+      const t = now - t0;
+      if (cv.width !== W() * dpr) size();
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, W(), H());
+      const alpha = t < STOP ? 0.85 : Math.max(0, 0.85 * (1 - (t - STOP) / FADE));
+      if (alpha <= 0) { ctx.clearRect(0, 0, W(), H()); return; }
+      ctx.globalAlpha = alpha;
+      ps.forEach((pt) => {
+        pt.ph += 0.03; pt.x += pt.vx + Math.sin(pt.ph) * 0.35; pt.y += pt.vy; pt.r += pt.vr;
+        if (pt.y > H() + 12 && t < STOP) Object.assign(pt, mk(-12));
+        ctx.save();
+        ctx.translate(pt.x, pt.y);
+        ctx.rotate(pt.r);
+        ctx.scale(1, Math.cos(pt.ph * 2));
+        ctx.fillStyle = pt.c;
+        ctx.fillRect(-pt.w / 2, -pt.h / 2, pt.w, pt.h);
+        ctx.restore();
+      });
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  function mountConfetti(root) {
+    (root || document).querySelectorAll('[data-confetti]').forEach(runConfetti);
+  }
+
   // ── UPDATES ──
   function fmtPostDate(d) {
     // Parsed at noon so a date never slips a day across time zones.
@@ -1291,7 +1370,8 @@
     const inner = u.heroVideo
       ? '<video class="post-hero__video" src="' + esc(u.heroVideo) + '" autoplay muted loop playsinline></video>' +
         '<div class="post-hero__scrim"></div>' +
-        '<img class="post-hero__badge" src="' + esc(u.hero) + '" alt="">'
+        '<canvas class="post-hero__confetti" data-confetti aria-hidden="true"></canvas>' +
+        '<span class="post-hero__badge" data-inline-svg="' + esc(u.hero) + '"></span>'
       : '<img class="post-hero__img" src="' + esc(u.hero) + '" alt="">';
     const body = '<div class="post-hero">' + inner + '</div>';
     return clickable ? '<a href="/updates/' + esc(u.slug) + '/" class="post-hero__link">' + body + '</a>' : body;
@@ -1361,6 +1441,7 @@
         '<div class="awards__hero" aria-hidden="true">' +
           '<video src="/images/best-of-2026-hero.mp4" autoplay muted loop playsinline></video>' +
           '<div class="awards__scrim"></div>' +
+          '<canvas class="awards__confetti" data-confetti aria-hidden="true"></canvas>' +
         '</div>' +
         '<div class="shell-md">' +
           '<header class="awards__header">' +
@@ -1370,7 +1451,7 @@
               '<p class="awards__sub">Honorees are announced on this page. Each one receives a badge to display on ' +
                 'their own site, linking back to the category they were recognized in.</p>' +
             '</div>' +
-            '<img class="awards__badge" src="/images/best-of-2026-badge.svg" alt="Best of 2026 badge">' +
+            '<span class="awards__badge" data-inline-svg="/images/best-of-2026-badge.svg" role="img" aria-label="Best of 2026 badge"></span>' +
           '</header>' +
           '<section class="awards__section"><h2>Content strategy in practice</h2>' + cats + '</section>' +
           '<section class="awards__section"><h2>Content strategy influencers</h2>' + infl + '</section>' +
@@ -1900,6 +1981,8 @@
     // Wire up any hero video this route just painted (no-op when there is none).
     openDeepLink(route);
     mountNewFlags(app);
+    inlineSvgs(app);
+    mountConfetti(app);
     if (scrollTop) {
       window.scrollTo(0, 0);
       // Real navigation (not an in-view update): move focus to the new content and

@@ -909,14 +909,14 @@
   // goes to its page (a click on a closed tile only opens it). Below 720px, and
   // on any device without hover, the CSS turns the strip into a swipeable row
   // of full cards that always navigate, and it never cycles.
-  // The open photo tile slowly zooms (Ken Burns), easing to a stop over 40
-  // seconds. The Best of 2026 tile does not zoom.
+  // The open tile slowly zooms (Ken Burns), easing to a stop over 40 seconds.
+  // On the Best of 2026 tile it is the badge that zooms, not the clip.
   // The Best of 2026 tile plays the clapping clip and confetti while open.
   // The Workspace photo is a placeholder (the Terminology header image).
   const STRIP = [
     { href: '/workspace/', label: 'Workspace', title: 'Build your plan', img: '/images/strip/workspace.webp', pos: 'center 50%' },
     { href: '/recommend/', label: 'Tool Recommender', title: 'Find your tools', img: '/images/strip/recommender.webp', pos: 'center 45%' },
-    { href: '/best-of-2026/', label: 'Best of 2026', title: 'Nominate a team', svg: '/images/best-of-2026-badge.svg', video: '/images/best-of-2026-hero.mp4' }
+    { href: '/best-of-2026/', label: 'Best of 2026', title: 'Nominations open', svg: '/images/best-of-2026-badge.svg', video: '/images/best-of-2026-hero.mp4' }
   ];
   const STRIP_MS = 7000;
   const STRIP_ROW = '(max-width: 719px), (hover: none)';
@@ -926,7 +926,7 @@
     const open = state.stripOpen;
     const arrow = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
     const tiles = STRIP.map((t, i) =>
-      '<a class="strip-tile' + (i === open ? ' is-open' : '') + '" href="' + t.href + '" data-action="strip-tile" data-i="' + i + '" aria-label="' + esc(t.label + ': ' + t.title) + '">' +
+      '<a class="strip-tile' + (t.video ? ' strip-tile--live' : '') + (i === open ? ' is-open' : '') + '" href="' + t.href + '" data-action="strip-tile" data-i="' + i + '" aria-label="' + esc(t.label + ': ' + t.title) + '">' +
         (t.svg
           ? '<span class="strip-tile__art" data-inline-svg="' + t.svg + '" data-svg-fit="slice" aria-hidden="true"></span>'
           : '<img class="strip-tile__art" src="' + t.img + '" alt="" decoding="async" style="object-position:' + t.pos + '">') +
@@ -957,7 +957,7 @@
     stripElapsed = 0;
     strip.querySelectorAll('.strip-tile').forEach((t, n) => {
       t.classList.toggle('is-open', n === i);
-      t.classList.toggle('is-zooming', n === i && !t.querySelector('.strip-tile__live'));
+      t.classList.toggle('is-zooming', n === i);
     });
     stripSyncLive(strip);
   }
@@ -1037,7 +1037,7 @@
     // Start the open tile's zoom just after it first paints, so it animates
     // from full size instead of appearing already zoomed.
     const open = strip.querySelector('.strip-tile.is-open');
-    if (open && !open.classList.contains('is-zooming') && !open.querySelector('.strip-tile__live')) {
+    if (open && !open.classList.contains('is-zooming')) {
       setTimeout(() => { if (open.classList.contains('is-open')) open.classList.add('is-zooming'); }, 60);
     }
     if (!strip._io && 'IntersectionObserver' in window) {

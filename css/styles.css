@@ -2093,12 +2093,22 @@ select.input { cursor: pointer; padding: 0 12px; }
 .strip-tile__badge {
   position: absolute;
   left: 50%;
-  top: 7%;
+  top: 4%;
   z-index: 2;
-  height: 52%;
+  height: 64%;
   aspect-ratio: 280 / 290;
   translate: -50% 0;
+  transform: scale(1);
+  transform-origin: 50% 40%;
+  transition: transform 700ms ease;
 }
+/* The badge takes the Ken Burns zoom on this tile; the clip and the photo
+   behind it stay still. */
+.strip-tile.is-zooming .strip-tile__badge {
+  transform: scale(1.12);
+  transition: transform 40s cubic-bezier(.1, .45, .2, 1);
+}
+.strip-tile--live.is-zooming .strip-tile__art { transform: scale(1); }
 .strip-tile__badge svg { width: 100%; height: 100%; }
 .strip-tile::after {
   content: '';
@@ -2209,8 +2219,11 @@ select.input { cursor: pointer; padding: 0 12px; }
   }
   .strip-tile__art { filter: none; transition: none; }
   .strip-tile__live { opacity: 1; transition: none; }
-  .strip-tile.is-zooming .strip-tile__art { transform: none; transition: none; }
+  .strip-tile.is-zooming .strip-tile__art,
+  .strip-tile.is-zooming .strip-tile__badge { transform: none; transition: none; }
   .strip-tile__vlabel { display: none; }
+  /* Shorter cards: a slightly smaller badge keeps clear of the title. */
+  .strip-tile__badge { top: 5%; height: 54%; }
   .strip-tile__body { opacity: 1; transition: none; }
 }
 @media (hover: none) and (min-width: 720px) {

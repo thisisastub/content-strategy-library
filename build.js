@@ -292,12 +292,13 @@ function head(opts) {
     // libraries (they use Function("return this")). Sources are the only external hosts used.
     '  <meta http-equiv="Content-Security-Policy" content="' + [
       "default-src \'self\'",
-      "script-src \'self\' \'unsafe-inline\' \'unsafe-eval\' https://www.googletagmanager.com",
+      "script-src \'self\' \'unsafe-inline\' \'unsafe-eval\' https://www.googletagmanager.com https://tally.so",
       "style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com",
       "font-src \'self\' https://fonts.gstatic.com",
       "img-src \'self\' data: https://www.google-analytics.com https://www.googletagmanager.com",
       "connect-src \'self\' https://api.web3forms.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com",
       "form-action \'self\' https://api.web3forms.com",
+      "frame-src https://tally.so",
       "base-uri \'self\'",
       "object-src \'none\'"
     ].join('; ') + '">',
@@ -343,7 +344,6 @@ function siteHeaderStatic() {
     '  <nav class="pr-nav-links">',
     '    <a href="/">Library</a>',
     '    <a href="/terminology/">Terminology</a>',
-    '    <a href="/recommend/">Tool Recommender</a>',
     '    <a href="/updates/">Updates</a>',
     '    <a href="/faq/">FAQ</a>',
     '    <a href="/about/">About</a>',
@@ -363,6 +363,7 @@ function siteFooterStatic() {
     '    <a href="/contact/">Contact</a>',
     '    <a href="/updates/">Updates</a>',
     '    <a href="/best-of-2026/">Best of 2026</a>',
+    '    <a class="pr-survey-link" href="/survey/">Survey</a>',
     '    <a href="/faq/">FAQ</a>',
     '    <a href="/about/">About</a>',
     '    <a href="/privacy/">Privacy</a>',
@@ -812,7 +813,7 @@ function renderPrivacyPage() {
     '  <nav class="pr-breadcrumb" aria-label="Breadcrumb"><a href="/">Library</a> › <span>Privacy</span></nav>',
     '  <h1>Privacy &amp; data</h1>',
     '  <p class="pr-summary">This site is a free, unmonetized reference. There are no ads, and your data is never sold or shared. ' +
-      'The only visitor data collected is anonymous usage analytics, and only if you consent.</p>',
+      'Apart from anything you choose to send through a form or the survey, the only visitor data collected is anonymous usage analytics, and only if you consent.</p>',
 
     '  <h2>Who runs this site</h2>',
     '  <p>The Content Strategy Library is run by ' + esc(AUTHOR.name) + '. ' +
@@ -830,7 +831,8 @@ function renderPrivacyPage() {
     '  <h2>Legal basis</h2>',
     '  <p>For visitors in the EU/UK and similar regions, the legal basis for analytics cookies is your <strong>consent</strong>, ' +
       'which you can withdraw at any time (see below). Essential, first-party functionality, remembering your cookie choice and ' +
-      'anything you save in the Workspace, is stored locally in your browser, is not tracking, and is never sent to us.</p>',
+      'anything you save in the Workspace, is stored locally in your browser, is not tracking, and is never sent to us. ' +
+      'Survey answers, and any email address you choose to give us, are processed on the basis of your consent.</p>',
 
     '  <h2>Cookies used</h2>',
     '  <ul>',
@@ -842,11 +844,29 @@ function renderPrivacyPage() {
     '  <p>Analytics data is processed by <strong>Google</strong> as a data processor on our behalf. Google may process it in the ' +
       'United States under its standard data-transfer safeguards (the EU-US Data Privacy Framework and Standard Contractual Clauses). ' +
       'Data is retained according to the Google Analytics retention setting for this property.</p>',
+    '  <p>Survey responses are collected by <strong>Tally</strong>, a form service based in Belgium that encrypts responses and stores them in Europe.</p>',
 
     '  <h2>The forms on this site</h2>',
     '  <p>If you use the <a href="/contact/">contact form</a> or the “Submit a Tool” form, what you type (including any email you ' +
       'provide so we can reply) is sent to the site owner’s inbox via <strong>Web3Forms</strong>, a form-delivery service. ' +
       'It is used only to respond to you and is not added to any marketing list.</p>',
+
+    '  <h2>The practitioner survey</h2>',
+    '  <p>The <a href="/survey/">practitioner survey</a> is optional and does not ask for your name. Results are reported only in ' +
+      'aggregate, as totals and percentages. Individual answers are never published, and no group small enough to identify ' +
+      'someone is reported on its own.</p>',
+    '  <p>At the end you can choose to leave your email address. If you do, it is used once, to send you the results when they ' +
+      'are published. You only receive news and updates if you tick that box. Responses are kept only as long as needed to ' +
+      'analyze and publish the results. If you left an email and want your response deleted, use the ' +
+      '<a href="/contact/other/">contact form</a>.</p>',
+
+    '  <h2>Email</h2>',
+    '  <p>This site follows the U.S. <strong>CAN-SPAM Act</strong> and similar rules elsewhere. You only get email from us if you ' +
+      'have expressly asked for it, for example by ticking the box for news and updates or by asking for survey results. Sending a ' +
+      'message through a form never adds you to a list, and your email address is <strong>never sold, rented, or traded</strong>.</p>',
+    '  <p>Every email we send says clearly who it is from, has an honest subject line, includes a postal address, and has a ' +
+      'working unsubscribe link. You can unsubscribe at any time, from any email, by clicking that link or by replying with the ' +
+      'word “unsubscribe.” Requests are honored promptly, and always within 10 business days.</p>',
 
     '  <h2>Your rights</h2>',
     '  <p>You can request access to, correction of, or deletion of your data; object to or restrict processing; and withdraw ' +
@@ -876,6 +896,62 @@ function renderPrivacyPage() {
   const crumbs = [{ name: 'Library', url: '/' }, { name: 'Privacy', url: '/privacy/' }];
   return [
     head({ title: 'Privacy & data, Content Strategy Library', description, canonical, jsonld: [graph([node], crumbs)] }),
+    shellOpen(), body, bootScripts()
+  ].join('\n');
+}
+
+/* ============================================================
+   PAGE: practitioner survey (the form itself is a Tally embed in the app)
+   ============================================================ */
+const SURVEY_URL = 'https://tally.so/r/q408Y5';
+function renderSurveyPage() {
+  const canonical = SITE + '/survey/';
+  const description = metaDescription('A two-minute, anonymous survey for content strategy practitioners about how content strategy is really used at work. Results reported only in aggregate and shared free.');
+  const li = (s) => '<li>' + s + '</li>';
+  const body = [
+    siteHeaderStatic(),
+    '<div class="pr-legal">',
+    '  <nav class="pr-breadcrumb" aria-label="Breadcrumb"><a href="/">Library</a> › <span>Survey</span></nav>',
+    '  <h1>How does content strategy really work where you are?</h1>',
+    '  <p class="pr-summary">We’d like to hear from content strategy practitioners about how content strategy is actually used in ' +
+      'your workplace: the tools your team relies on, the ones it has quietly dropped, how you measure success, and where AI is ' +
+      'showing up. About 2 minutes, 9 short questions, no names asked for.</p>',
+    '  <p><a href="' + SURVEY_URL + '" rel="noopener">Take the survey</a></p>',
+
+    '  <h2>Why your answers matter</h2>',
+    '  <p>Most of what gets written about content strategy describes how it should work. This survey asks how it does work, in ' +
+      'real teams with real deadlines. When the results are published here, free, you will be able to see how your own practice ' +
+      'compares with your peers’, and which tools in this library people actually use.</p>',
+
+    '  <h2>Before you start</h2>',
+    '  <ul>',
+    li('<strong>Voluntary.</strong> Taking part is up to you, and you can stop at any time.'),
+    li('<strong>Anonymous.</strong> The survey never asks for your name or your employer’s name.'),
+    li('<strong>Reported only in aggregate.</strong> Results are shared as totals and percentages across everyone who answered. ' +
+      'Individual answers are never published, and no group small enough to single someone out is reported on its own.'),
+    li('<strong>Email is optional.</strong> At the end you can leave your email to get the results. It is used once, to send you ' +
+      'the report. You only hear from us beyond that if you tick the news and updates box, and you can unsubscribe at any time.'),
+    li('<strong>Never sold.</strong> Your answers and your email address are never sold, rented, or shared. There is no sponsor.'),
+    li('<strong>Who sees it.</strong> Only the library’s maintainer. Responses are collected by Tally, a form service based in ' +
+      'Belgium that stores data in Europe. The <a href="/privacy/">privacy page</a> has the details.'),
+    li('<strong>18 and over.</strong> The survey is meant for working professionals aged 18 or older.'),
+    '  </ul>',
+    '  <p>Questions about the survey? Use the <a href="/contact/other/">contact form</a>.</p>',
+    '</div>',
+    siteFooterStatic()
+  ].join('\n');
+
+  const node = {
+    '@type': 'WebPage',
+    url: canonical,
+    name: 'Content strategy practitioner survey',
+    description: description,
+    publisher: { '@id': ORG_ID },
+    dateModified: ISO_TOKEN
+  };
+  const crumbs = [{ name: 'Library', url: '/' }, { name: 'Survey', url: '/survey/' }];
+  return [
+    head({ title: 'Practitioner Survey, Content Strategy Library', description, canonical, jsonld: [graph([node], crumbs)] }),
     shellOpen(), body, bootScripts()
   ].join('\n');
 }
@@ -1089,6 +1165,7 @@ function buildSitemap(data) {
   add('/terminology/', '0.7', pageOf('/terminology/'));
   add('/faq/', '0.6', pageOf('/faq/'));
   add('/about/', '0.5', pageOf('/about/'));
+  add('/survey/', '0.5', pageOf('/survey/'));
   add('/contact/', '0.4', pageOf('/contact/'));
   add('/privacy/', '0.3', pageOf('/privacy/'));
   const body = urls.map((u) =>
@@ -1145,6 +1222,7 @@ function buildLlmsTxt(data) {
   lines.push('- [Terminology glossary](' + SITE + '/terminology/): ' + data.TERMINOLOGY.length + ' content strategy terms defined.');
   lines.push('- [FAQ](' + SITE + '/faq/): Honest answers to common content strategy questions.');
   lines.push('- [About](' + SITE + '/about/): What this library is and who it is for.');
+  lines.push('- [Practitioner survey](' + SITE + '/survey/): A two-minute anonymous survey on how content strategy is used at work.');
   lines.push('- [Contact](' + SITE + '/contact/): Get in touch with the maintainer.');
   lines.push('- [Privacy](' + SITE + '/privacy/): How data is handled (analytics, cookies, your rights).');
   lines.push('- [Full text dump](' + SITE + '/llms-full.txt): Every tool and term as plain text.');
@@ -1234,6 +1312,7 @@ function build() {
   w(path.join('faq', 'index.html'), renderFaqPage(data));
   w(path.join('about', 'index.html'), renderAboutPage(data));
   w(path.join('privacy', 'index.html'), renderPrivacyPage());
+  w(path.join('survey', 'index.html'), renderSurveyPage());
 
   // Updates feed, one page per post, and the awards page.
   w(path.join('updates', 'index.html'), renderUpdatesFeed(data));

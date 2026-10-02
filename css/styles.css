@@ -1051,6 +1051,15 @@ a {
 .contact-topic { margin-bottom: var(--space-2); }
 
 /* ── Workspace: the Customize accordion and the logo field ── */
+/* One card holds the header and everything it collapses, so the boundary of
+   the section is visible whether it is open or shut. */
+.ws-cust {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.ws-cust.is-open { box-shadow: var(--shadow-sm); }
 .ws-cust__row {
   width: 100%;
   display: flex;
@@ -1059,8 +1068,8 @@ a {
   gap: var(--space-6);
   padding: var(--space-5) var(--space-6);
   background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  border: 0;
+  border-radius: 0;
   cursor: pointer;
   text-align: left;
   font-family: var(--font-sans);
@@ -1080,9 +1089,46 @@ a {
   color: var(--text-muted);
   max-width: 62ch;
 }
-.ws-cust__body { padding-top: var(--space-8); }
+.ws-cust.is-open .ws-cust__row { background: var(--bg-subtle); }
+.ws-cust__body {
+  padding: var(--space-8) var(--space-6) var(--space-6);
+  border-top: 1px dashed var(--border-strong);
+}
+@media (max-width: 640px) {
+  .ws-cust__row { padding: var(--space-4); }
+  .ws-cust__body { padding: var(--space-6) var(--space-4) var(--space-4); }
+}
 
-.ws-logo { margin-top: var(--space-8); max-width: 760px; }
+.ws-logo {
+  margin-top: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--border);
+  max-width: 760px;
+}
+.ws-logo .field-label { margin-bottom: var(--space-1); }
+/* The native file input, styled as a quiet secondary button with the chosen
+   file name beside it, rather than squeezed into a text-field box. */
+.ws-logo__file {
+  display: block;
+  max-width: 100%;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+.ws-logo__file::file-selector-button {
+  margin-right: var(--space-3);
+  padding: 8px 16px;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background-color 140ms ease;
+}
+.ws-logo__file:hover::file-selector-button { background: rgba(var(--highlight-rgb), 0.18); }
 .ws-logo__hint {
   font-family: var(--font-sans);
   font-size: var(--text-sm);
@@ -1484,11 +1530,11 @@ select.input { cursor: pointer; padding: 0 12px; }
 /* ============================================================
    FAQ
    ============================================================ */
-.faq-list { padding: var(--space-2) 0 var(--space-24); }
+.faq-list { padding: var(--space-4) 0 var(--space-24); display: flex; flex-direction: column; gap: var(--space-5); }
 .faq-item { border-bottom: 1px dashed var(--border-strong); }
 .faq-q {
   width: 100%; display: flex; align-items: center; justify-content: space-between; gap: var(--space-6);
-  padding: var(--space-9) 0; background: none; border: none; cursor: pointer; text-align: left;
+  padding: var(--space-6) 0; background: none; border: none; cursor: pointer; text-align: left;
 }
 .faq-q span:first-child {
   font-family: var(--font-sans); font-size: var(--text-xl); font-weight: var(--weight-semibold);
@@ -1498,9 +1544,9 @@ select.input { cursor: pointer; padding: 0 12px; }
   font-size: 20px; color: var(--text-muted); flex-shrink: 0; line-height: 1; font-weight: 300;
   width: 24px; text-align: center; font-family: var(--font-sans);
 }
-.faq-a { padding: 0 var(--space-16) var(--space-8) 0; }
+.faq-a { padding: var(--space-4) var(--space-16) var(--space-8) 0; }
 .faq-a p {
-  font-family: var(--font-sans); font-size: var(--text-lg); line-height: var(--leading-normal);
+  font-family: var(--font-sans); font-size: var(--text-md); line-height: var(--leading-normal);
   color: var(--text-secondary); margin: 0;
 }
 
@@ -1970,3 +2016,334 @@ select.input { cursor: pointer; padding: 0 12px; }
 .prerender-shell .pr-field textarea:focus { outline: none; border-color: var(--ink-400); box-shadow: 0 0 0 3px rgba(247,197,49,0.28); }
 .prerender-shell .pr-form .btn { align-self: flex-start; }
 .prerender-shell .pr-hp { position: absolute; left: -9999px; }
+
+/* ============================================================
+   HOME FILMSTRIP
+   Three photo tiles to the right of the library title (Claude
+   Design option 1d). One tile is open at a time. Below 720px, and
+   on any device without hover, it becomes a swipeable row.
+   ============================================================ */
+.index-header--split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 440px;
+  gap: var(--space-12);
+  align-items: center;
+  padding: 72px 0;
+}
+.strip {
+  --gutter: var(--space-10);
+  display: flex;
+  gap: 8px;
+  height: 300px;
+}
+.strip-tile {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  background: var(--ink-950);
+  color: #fff;
+  text-decoration: none;
+  transition: flex-grow 500ms cubic-bezier(.4, 0, .2, 1);
+}
+.strip-tile.is-open { flex-grow: 5; }
+.strip-tile__art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: grayscale(.6);
+  transform: scale(1);
+  transition: filter 500ms cubic-bezier(.4, 0, .2, 1), transform 700ms ease;
+}
+.strip-tile.is-open .strip-tile__art { filter: none; }
+/* Ken Burns: the open tile creeps in to 115% over 40 seconds on a curve that
+   keeps slowing, so a tile left open drifts to a stop. Closing snaps back
+   over 700ms while the tile folds. */
+.strip-tile.is-zooming .strip-tile__art {
+  transform: scale(1.15);
+  transition: filter 500ms cubic-bezier(.4, 0, .2, 1), transform 40s cubic-bezier(.1, .45, .2, 1);
+}
+/* Best of 2026 when open: the clapping clip, confetti, and the badge. */
+.strip-tile__live {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: var(--ink-950);
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+.strip-tile.is-open .strip-tile__live { opacity: 1; }
+.strip-tile__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: brightness(.6);
+}
+.strip-tile__confetti { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+.strip-tile__badge {
+  position: absolute;
+  left: 50%;
+  top: 7%;
+  z-index: 2;
+  height: 52%;
+  aspect-ratio: 280 / 290;
+  translate: -50% 0;
+}
+.strip-tile__badge svg { width: 100%; height: 100%; }
+.strip-tile::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  /* Darker than the design's 35% → .9 so the white title always reads. */
+  background: linear-gradient(rgba(22, 22, 14, 0) 15%, rgba(22, 22, 14, .55) 55%, rgba(22, 22, 14, .95) 100%);
+  pointer-events: none;
+}
+/* Closed tiles: the label reads bottom to top, 40px up from the bottom. */
+.strip-tile__vlabel {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  z-index: 2;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  translate: -50% -40px;
+  white-space: nowrap;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #fff;
+  transition: opacity 200ms ease;
+}
+.strip-tile.is-open .strip-tile__vlabel { opacity: 0; }
+/* Open tile: label, title and the yellow arrow along the bottom. */
+.strip-tile__body {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 20px;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+.strip-tile.is-open .strip-tile__body { opacity: 1; transition: opacity 300ms ease 250ms; }
+.strip-tile__text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.strip-tile__label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--highlight);
+  white-space: nowrap;
+}
+.strip-tile__title {
+  font-family: var(--font-sans);
+  font-size: 24px;
+  font-weight: var(--weight-bold);
+  line-height: 1.15;
+  letter-spacing: var(--tracking-tight);
+  color: #fff;
+  white-space: nowrap;
+}
+.strip-tile__go {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: var(--highlight);
+  color: var(--ink-950);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Tablet: under the intro, full width, a little shorter. */
+@media (max-width: 1023px) {
+  .index-header--split { grid-template-columns: minmax(0, 1fr); gap: var(--space-8); }
+  .strip { height: 240px; }
+}
+@media (max-width: 900px) {
+  .strip { --gutter: var(--space-6); }
+}
+
+/* Phones, and any touch device: a swipeable row of full cards that peek
+   in from the right and snap to the page gutter. */
+@media (max-width: 719px), (hover: none) {
+  .index-header--split { grid-template-columns: minmax(0, 1fr); gap: var(--space-8); }
+  .strip {
+    height: auto;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    margin-inline: calc(-1 * var(--gutter));
+    padding-inline: var(--gutter);
+    scrollbar-width: none;
+  }
+  .strip::-webkit-scrollbar { display: none; }
+  .strip-tile,
+  .strip-tile.is-open {
+    flex: 0 0 min(80vw, 440px);
+    height: 200px;
+    scroll-snap-align: start;
+    transition: none;
+  }
+  .strip-tile__art { filter: none; transition: none; }
+  .strip-tile__live { opacity: 1; transition: none; }
+  .strip-tile.is-zooming .strip-tile__art { transform: none; transition: none; }
+  .strip-tile__vlabel { display: none; }
+  .strip-tile__body { opacity: 1; transition: none; }
+}
+@media (hover: none) and (min-width: 720px) {
+  .strip-tile, .strip-tile.is-open { height: 240px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .strip-tile, .strip-tile__art, .strip-tile__vlabel,
+  .strip-tile__body, .strip-tile.is-open .strip-tile__body { transition: none; }
+  .strip-tile.is-zooming .strip-tile__art { transform: none; transition: none; }
+  .strip-tile__live { display: none; }
+}
+
+/* ============================================================
+   SURVEY PAGE
+   ============================================================ */
+.survey-facts {
+  list-style: none;
+  display: flex; flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: var(--space-8) 0;
+  padding: 0;
+}
+.survey-facts li {
+  display: flex; flex-direction: column;
+  min-width: 120px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  font-family: var(--font-sans);
+}
+.survey-facts strong { font-size: var(--text-xl); line-height: 1.1; color: var(--text-primary); }
+.survey-facts span { font-size: var(--text-sm); color: var(--text-muted); }
+.survey-fine {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: var(--space-3);
+}
+.survey-fine li {
+  position: relative;
+  padding-left: var(--space-6);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--text-secondary);
+}
+.survey-fine li::before {
+  content: '';
+  position: absolute; left: 2px; top: 0.6em;
+  width: 8px; height: 8px;
+  background: var(--highlight);
+  transform: rotate(45deg);
+}
+.survey-fine strong { color: var(--text-primary); }
+.survey-embed {
+  scroll-margin-top: 80px;
+  margin-top: var(--space-10);
+  padding: var(--space-6) var(--space-8);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+.survey-embed iframe { display: block; width: 100%; border: 0; min-height: 400px; }
+.survey-embed__alt {
+  margin: var(--space-4) 0 0;
+  padding-top: var(--space-4);
+  border-top: 1px dashed var(--border);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+@media (max-width: 640px) {
+  .survey-embed { padding: var(--space-4); }
+  .survey-facts li { min-width: calc(50% - var(--space-3)); }
+}
+
+/* Footer: the survey link wears the highlighter, so it reads as yellow
+   without yellow text (which would be unreadable on the light footer). */
+.footer__nav a.footer__survey {
+  justify-self: start;
+  background: var(--highlight);
+  color: var(--ink-950);
+  font-weight: var(--weight-semibold);
+  transition: background-color 140ms ease;
+}
+.footer__nav a.footer__survey:hover,
+.footer__nav a.footer__survey:focus-visible { background: #e8b820; color: var(--ink-950); }
+.prerender-shell .pr-survey-link { background: var(--highlight); color: var(--ink-950); font-weight: 600; padding: 0 4px; border-radius: var(--radius-sm); }
+
+/* ── Smooth hero drift ──
+   Where the browser supports scroll-driven animations, the drift runs on the
+   compositor in lockstep with the scroll, so the image never trails the page
+   by a frame (the old scroll listener did, which read as a small bounce).
+   Rate is unchanged: 0.975px of drift per 1px of scroll, over a range long
+   enough for any page. Other browsers keep the --hero-anchor fallback. */
+@keyframes bgHeroDrift {
+  from { transform: translate3d(-50%, 0, 0); }
+  to   { transform: translate3d(-50%, 19500px, 0); }
+}
+@keyframes awardsDrift {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(0, 19500px, 0); }
+}
+@supports (animation-timeline: scroll()) {
+  .bg-hero {
+    animation: bgHeroDrift linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0px 20000px;
+  }
+  .awards__hero video {
+    animation: awardsDrift linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0px 20000px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bg-hero, .awards__hero video { animation: none; }
+}
+
+/* Survey: the form opens under the header once "Take the survey" is clicked. */
+.survey-cta-note {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+.survey .survey-embed { margin: var(--space-10) 0; }
+.survey-embed:focus { outline: none; }
+.survey-embed__loading {
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+.survey-embed.is-loaded .survey-embed__loading { display: none; }

@@ -17,7 +17,7 @@
   const VIEW_PATH = {
     index: '/', terminology: '/terminology/', faq: '/faq/', about: '/about/',
     recommend: '/recommend/', submit: '/submit/', workspace: '/workspace/',
-    updates: '/updates/', awards: '/best-of-2026/'
+    updates: '/updates/', awards: '/best-of-2026/', survey: '/survey/'
   };
   // Navigate via History API, then re-render.
   function navTo(path) {
@@ -28,7 +28,7 @@
   // Bump this when the library's content is updated.
   // Auto-stamped by build.js on every build (see stampLastUpdated). Manual edits
   // here are overwritten on the next `node build.js`.
-  const LAST_UPDATED = 'October 1, 2026';
+  const LAST_UPDATED = 'October 2, 2026';
 
   // Web3Forms endpoint for the "Submit a Tool" form. The access key is public by design
   // (Web3Forms routes it to the maintainer's inbox and handles spam filtering server-side).
@@ -57,6 +57,8 @@
     copiedAnchor: '',
     copiedText: '',
     wsCustomizeOpen: false,
+    stripOpen: 1,         // homepage filmstrip: open tile (Tool Recommender)
+    surveyOpen: false,    // survey page: form revealed by "Take the survey"
     // Logo lives in memory only, never in localStorage.
     wsLogo: null,
     wsLogoAttested: false,
@@ -187,7 +189,7 @@
         '<label class="field-label" for="wf-logo">Logo <span class="opt">(optional)</span></label>' +
         '<p class="ws-logo__hint">PNG, JPG, WEBP or SVG. It replaces the accent square on the cover of your ' +
           'PDF and PowerPoint. Kept in this browser tab only, never uploaded and never saved.</p>' +
-        '<input class="input" type="file" id="wf-logo" accept="image/png,image/jpeg,image/webp,image/svg+xml" data-action="ws-logo-pick">' +
+        '<input class="ws-logo__file" type="file" id="wf-logo" accept="image/png,image/jpeg,image/webp,image/svg+xml" data-action="ws-logo-pick">' +
         (has ? '<div class="ws-logo__preview"><img src="' + L.dataUrl + '" alt=""><span>' + esc(L.name || 'logo') + '</span>' +
           '<button class="btn btn--sm btn--ghost" data-action="ws-logo-clear">Remove</button></div>' : '') +
         (has ? '<p class="ws-logo__warn">Only upload a logo you are authorized to use. You are responsible for ' +
@@ -423,6 +425,7 @@
     terminology: { src: '/images/heroes/terminology.webp', pos: 'center 50%' },
     updates:     { src: '/images/heroes/updates.webp',     pos: 'center 58%' },
     faq:         { src: '/images/heroes/faq.webp',         pos: 'center 22%' },
+    survey:      { src: '/images/heroes/faq.webp',         pos: 'center 22%' },
     about:       { src: '/images/heroes/about.webp',       pos: 'center 30%' }
   };
   function bgHero(key, opts) {
@@ -443,7 +446,6 @@
     return {
       library: r.view === 'index' || r.view === 'detail',
       terminology: r.view === 'terminology',
-      recommend: r.view === 'recommend',
       updates: r.view === 'updates' || r.view === 'update',
       faq: r.view === 'faq',
       about: r.view === 'about'
@@ -465,7 +467,6 @@
         '<div class="nav__links">' +
           btn('/', 'Library', { cls: 'ds-highlight-swipe', current: cur.library }) +
           btn('/terminology/', 'Terminology', { cls: 'ds-highlight-swipe', current: cur.terminology }) +
-          btn('/recommend/', 'Tool Recommender', { cls: 'ds-highlight-swipe', current: cur.recommend }) +
           btn('/updates/', 'Updates', { cls: 'ds-highlight-swipe', current: cur.updates }) +
           btn('/faq/', 'FAQ', { cls: 'ds-highlight-swipe', current: cur.faq }) +
           btn('/about/', 'About', { cls: 'ds-highlight-swipe', current: cur.about }) +
@@ -498,6 +499,7 @@
           '<a class="soft-highlight" href="/contact/">Contact</a>' +
           '<a class="soft-highlight" href="/updates/">Updates</a>' +
           '<a class="soft-highlight" href="/best-of-2026/">Best of 2026</a>' +
+          '<a class="footer__survey" href="/survey/">Survey</a>' +
           '<a class="soft-highlight" href="/faq/">FAQ</a>' +
           '<a class="soft-highlight" href="/about/">About</a>' +
           '<button type="button" class="soft-highlight footer__linkbtn" data-action="credits-open">Imagery credits</button>' +
@@ -648,16 +650,16 @@
       where: 'Library icon, top nav', go: 'top',
       who: 'Soetarman Atmodjo', site: 'The Noun Project',
       url: 'https://thenounproject.com/icon/library-8367955/' },
-    { thumb: '/images/heroes/recommender.webp', where: 'Tool Recommender header', go: '/recommend/',
+    { thumb: '/images/heroes/recommender.webp', where: 'Tool Recommender header and homepage', go: '/recommend/',
       who: 'bejone1824', site: 'Pixabay',
       url: 'https://pixabay.com/photos/tool-belt-hammer-screwdrivers-10305989/' },
-    { thumb: '/images/heroes/terminology.webp', where: 'Terminology header', go: '/terminology/',
+    { thumb: '/images/heroes/terminology.webp', where: 'Terminology header and homepage Workspace tile', go: '/terminology/',
       who: 'Cup of Couple', site: 'Pexels',
       url: 'https://www.pexels.com/photo/notepads-and-stationeries-on-white-surface-7657391/' },
     { thumb: '/images/heroes/updates.webp', where: 'Updates header', go: '/updates/',
       who: 'tama66', site: 'Pixabay',
       url: 'https://pixabay.com/photos/typewriter-write-old-vintage-8622984/' },
-    { thumb: '/images/heroes/faq.webp', where: 'FAQ header', go: '/faq/',
+    { thumb: '/images/heroes/faq.webp', where: 'FAQ and Survey headers', go: '/faq/',
       who: 'Pavel Danilyuk', site: 'Pexels',
       url: 'https://www.pexels.com/photo/a-woman-in-white-shirt-raising-her-hand-8761544/' },
     { thumb: '/images/heroes/about.webp', where: 'About header', go: '/about/',
@@ -876,9 +878,12 @@
 
     return shell(
       '<div class="shell-xl">' +
-        '<header class="index-header dashed-b has-bg-hero">' + bgHero('home') +
-          '<h1 class="index-title">Content Strategy Tools</h1>' +
-          '<p class="index-lede">A working reference for the frameworks content strategists actually use. Easily look up what each one is and when to reach for it.</p>' +
+        '<header class="index-header index-header--split dashed-b has-bg-hero">' + bgHero('home') +
+          '<div class="index-header__text">' +
+            '<h1 class="index-title">Content Strategy Tools</h1>' +
+            '<p class="index-lede">A working reference for the frameworks content strategists actually use. Easily look up what each one is and when to reach for it.</p>' +
+          '</div>' +
+          filmstrip() +
         '</header>' +
         '<div class="tool-search">' +
           '<label for="tool-search">Search tools</label>' +
@@ -894,6 +899,172 @@
       '</div>'
     );
   }
+
+  // ── Home filmstrip ──
+  // Three photo tiles beside the library title (Claude Design option 1d). One
+  // is open at a time. The strip moves to the next tile every 7 seconds, and
+  // holds still while the pointer is over it, while a tile has keyboard focus,
+  // when it is scrolled out of view, when the tab is hidden, and always under
+  // reduced motion. Hovering or focusing a tile opens it; clicking an open tile
+  // goes to its page (a click on a closed tile only opens it). Below 720px, and
+  // on any device without hover, the CSS turns the strip into a swipeable row
+  // of full cards that always navigate, and it never cycles.
+  // The open photo tile slowly zooms (Ken Burns), easing to a stop over 40
+  // seconds. The Best of 2026 tile does not zoom.
+  // The Best of 2026 tile plays the clapping clip and confetti while open.
+  // The Workspace photo is a placeholder (the Terminology header image).
+  const STRIP = [
+    { href: '/workspace/', label: 'Workspace', title: 'Build your plan', img: '/images/strip/workspace.webp', pos: 'center 50%' },
+    { href: '/recommend/', label: 'Tool Recommender', title: 'Find your tools', img: '/images/strip/recommender.webp', pos: 'center 45%' },
+    { href: '/best-of-2026/', label: 'Best of 2026', title: 'Nominate a team', svg: '/images/best-of-2026-badge.svg', video: '/images/best-of-2026-hero.mp4' }
+  ];
+  const STRIP_MS = 7000;
+  const STRIP_ROW = '(max-width: 719px), (hover: none)';
+  const stripIsRow = () => !!(window.matchMedia && window.matchMedia(STRIP_ROW).matches);
+  const reducedMotion = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  function filmstrip() {
+    const open = state.stripOpen;
+    const arrow = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+    const tiles = STRIP.map((t, i) =>
+      '<a class="strip-tile' + (i === open ? ' is-open' : '') + '" href="' + t.href + '" data-action="strip-tile" data-i="' + i + '" aria-label="' + esc(t.label + ': ' + t.title) + '">' +
+        (t.svg
+          ? '<span class="strip-tile__art" data-inline-svg="' + t.svg + '" data-svg-fit="slice" aria-hidden="true"></span>'
+          : '<img class="strip-tile__art" src="' + t.img + '" alt="" decoding="async" style="object-position:' + t.pos + '">') +
+        (t.video
+          ? '<span class="strip-tile__live" aria-hidden="true">' +
+              '<video class="strip-tile__video" src="' + t.video + '" muted loop playsinline preload="none"></video>' +
+              '<canvas class="strip-tile__confetti"></canvas>' +
+              '<span class="strip-tile__badge" data-inline-svg="' + t.svg + '"></span>' +
+            '</span>'
+          : '') +
+        '<span class="strip-tile__vlabel" aria-hidden="true">' + esc(t.label) + '</span>' +
+        '<span class="strip-tile__body" aria-hidden="true">' +
+          '<span class="strip-tile__text">' +
+            '<span class="strip-tile__label">' + esc(t.label) + '</span>' +
+            '<span class="strip-tile__title">' + esc(t.title) + '</span>' +
+          '</span>' +
+          '<span class="strip-tile__go">' + arrow + '</span>' +
+        '</span>' +
+      '</a>').join('');
+    return '<nav class="strip" aria-label="Featured">' + tiles + '</nav>';
+  }
+
+  let stripTick = null;
+  let stripElapsed = 0;
+  // Opens tile i in place, so the flex, fade and zoom transitions run.
+  function stripSetOpen(strip, i) {
+    state.stripOpen = i;
+    stripElapsed = 0;
+    strip.querySelectorAll('.strip-tile').forEach((t, n) => {
+      t.classList.toggle('is-open', n === i);
+      t.classList.toggle('is-zooming', n === i && !t.querySelector('.strip-tile__live'));
+    });
+    stripSyncLive(strip);
+  }
+  function stripOpenTile(tile) {
+    const strip = tile.closest('.strip');
+    if (!strip || tile.classList.contains('is-open')) return;
+    stripSetOpen(strip, Number(tile.getAttribute('data-i')) || 0);
+  }
+  // The clip and confetti run only while the Best of 2026 tile is open (or,
+  // in the phone row, while that card is on screen), so they cost nothing
+  // the rest of the time.
+  function stripSyncLive(strip) {
+    strip.querySelectorAll('.strip-tile__live').forEach((live) => {
+      const tile = live.closest('.strip-tile');
+      const on = !reducedMotion() && (stripIsRow() ? !!tile._inView : tile.classList.contains('is-open'));
+      const v = live.querySelector('video');
+      if (on) {
+        const p = v.play();
+        if (p && p.catch) p.catch(() => {});
+      } else {
+        v.pause();
+      }
+      tileConfetti(live.querySelector('canvas'), on);
+    });
+  }
+  // A gentle, endless version of the awards confetti, sized to the tile. It
+  // fades in when switched on, fades out when switched off, then stops.
+  function tileConfetti(cv, on) {
+    if (!cv) return;
+    cv._on = on;
+    if (!on || cv._running) return;
+    cv._running = true;
+    const ctx = cv.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const cols = ['#F7C531', '#C99A14', '#F8F7F2', '#E8D9A8'];
+    const mk = (y) => ({
+      fx: Math.random(), y: y,
+      vy: 0.35 + Math.random() * 0.6, vx: (Math.random() - 0.5) * 0.3,
+      r: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.1,
+      w: 3 + Math.random() * 3, h: 5 + Math.random() * 5,
+      c: cols[Math.floor(Math.random() * cols.length)], ph: Math.random() * 6.28
+    });
+    const ps = [];
+    let alpha = 0;
+    const tick = () => {
+      if (!cv.isConnected) { cv._running = false; return; }
+      const W = cv.clientWidth, H = cv.clientHeight;
+      if (!W || !H) { requestAnimationFrame(tick); return; }
+      if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) {
+        cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+      }
+      alpha = cv._on ? Math.min(0.9, alpha + 0.03) : alpha - 0.05;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+      if (alpha <= 0) { cv._running = false; return; }
+      const N = Math.max(14, Math.round(W / 9));
+      while (ps.length < N) ps.push(mk(-Math.random() * H));
+      ctx.globalAlpha = alpha;
+      ps.forEach((pt) => {
+        pt.ph += 0.03; pt.fx += (pt.vx + Math.sin(pt.ph) * 0.3) / W; pt.y += pt.vy; pt.r += pt.vr;
+        if (pt.y > H + 10) Object.assign(pt, mk(-10));
+        ctx.save();
+        ctx.translate(pt.fx * W, pt.y);
+        ctx.rotate(pt.r);
+        ctx.scale(1, Math.cos(pt.ph * 2));
+        ctx.fillStyle = pt.c;
+        ctx.fillRect(-pt.w / 2, -pt.h / 2, pt.w, pt.h);
+        ctx.restore();
+      });
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+  function mountFilmstrip(root) {
+    const strip = root.querySelector('.strip');
+    if (!strip) return;
+    // Start the open tile's zoom just after it first paints, so it animates
+    // from full size instead of appearing already zoomed.
+    const open = strip.querySelector('.strip-tile.is-open');
+    if (open && !open.classList.contains('is-zooming') && !open.querySelector('.strip-tile__live')) {
+      setTimeout(() => { if (open.classList.contains('is-open')) open.classList.add('is-zooming'); }, 60);
+    }
+    if (!strip._io && 'IntersectionObserver' in window) {
+      strip._io = new IntersectionObserver((entries) => {
+        entries.forEach((en) => { en.target._inView = en.isIntersecting; });
+        stripSyncLive(strip);
+      }, { threshold: 0.4 });
+      strip.querySelectorAll('.strip-tile').forEach((t) => strip._io.observe(t));
+    }
+    stripSyncLive(strip);
+    if (stripTick || reducedMotion()) return;
+    stripTick = setInterval(() => {
+      const el = document.querySelector('.strip');
+      if (!el) { clearInterval(stripTick); stripTick = null; return; }
+      if (stripIsRow() || document.hidden || el.matches(':hover') || el.querySelector(':focus-visible')) return;
+      const r = el.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > window.innerHeight) return;
+      stripElapsed += 250;
+      if (stripElapsed >= STRIP_MS) stripSetOpen(el, (state.stripOpen + 1) % STRIP.length);
+    }, 250);
+  }
+  ['mouseover', 'focusin'].forEach((type) => {
+    document.addEventListener(type, (e) => {
+      const tile = e.target.closest && e.target.closest('.strip-tile');
+      if (tile && !stripIsRow()) stripOpenTile(tile);
+    });
+  });
 
   // `order` is the card's visual position, used to stagger the NEW flag fade.
   function toolCard(t, order) {
@@ -1284,7 +1455,12 @@
       const put = (text) => {
         el.innerHTML = text;
         const svg = el.querySelector('svg');
-        if (svg) { svg.style.display = 'block'; svg.setAttribute('aria-hidden', 'true'); }
+        if (svg) {
+          svg.style.display = 'block';
+          svg.setAttribute('aria-hidden', 'true');
+          // data-svg-fit="slice" crops the artwork to fill its box, like object-fit: cover.
+          if (el.getAttribute('data-svg-fit') === 'slice') svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+        }
       };
       if (svgCache[src]) { put(svgCache[src]); return; }
       fetch(src)
@@ -1610,21 +1786,110 @@
         '<header class="wizard-header dashed-b">' +
           '<div class="detail-badge-row"><span class="badge badge--highlight">Privacy</span></div>' +
           '<h1 class="detail-title" style="font-size:var(--text-4xl);margin-bottom:var(--space-5)">Privacy &amp; data</h1>' +
-          '<p class="about-lede">This site is a free, unmonetized reference. There are no ads, and your data is never sold or shared. The only visitor data collected is anonymous usage analytics, and only if you consent.</p>' +
+          '<p class="about-lede">This site is a free, unmonetized reference. There are no ads, and your data is never sold or shared. Apart from anything you choose to send through a form or the survey, the only visitor data collected is anonymous usage analytics, and only if you consent.</p>' +
         '</header>' +
         sect('Who runs this site', p('The Content Strategy Library is run by Tommy Stubblefield. To exercise any of the rights below, or ask anything about your data, please use the <a class="csl-body-link" href="/contact/">contact form</a>, no email address is published here to keep spam down.')) +
         sect('What is collected, and when',
           p('If you click <strong>Accept</strong> on the cookie banner, the site uses <strong>Google Analytics 4</strong> to understand how the library is used. Until you accept, Google Analytics runs in a cookieless mode that sets <strong>no cookie</strong> and stores nothing on your device. If you click <strong>Reject</strong>, it stays that way permanently.') +
           p('When enabled, Google Analytics may process: pages you view, approximate location (country/region), your device and browser type, and the site that referred you. Google Analytics 4 <strong>does not store your full IP address</strong>. The site sets no advertising cookies and does no cross-site tracking.')) +
-        sect('Legal basis', p('For visitors in the EU/UK and similar regions, the legal basis for analytics cookies is your <strong>consent</strong>, which you can withdraw at any time. Essential, first-party functionality, remembering your cookie choice and anything you save in the Workspace, is stored locally in your browser, is not tracking, and is never sent to us.')) +
+        sect('Legal basis', p('For visitors in the EU/UK and similar regions, the legal basis for analytics cookies is your <strong>consent</strong>, which you can withdraw at any time. Essential, first-party functionality, remembering your cookie choice and anything you save in the Workspace, is stored locally in your browser, is not tracking, and is never sent to us. Survey answers, and any email address you choose to give us, are processed on the basis of your consent.')) +
         sect('Cookies used', '<ul>' + li('<strong>_ga, _ga_*</strong> (Google Analytics), distinguish anonymous visitors and sessions. Set only after you Accept; last up to ~13 months.') + li('<strong>Local storage</strong> (first-party, functional), your cookie choice and Workspace items. Never leaves your browser.') + '</ul>') +
-        sect('Who your data is shared with', p('Analytics data is processed by <strong>Google</strong> as a data processor on our behalf. Google may process it in the United States under its standard data-transfer safeguards (the EU-US Data Privacy Framework and Standard Contractual Clauses). Data is retained according to the Google Analytics retention setting for this property.')) +
+        sect('Who your data is shared with', p('Analytics data is processed by <strong>Google</strong> as a data processor on our behalf. Google may process it in the United States under its standard data-transfer safeguards (the EU-US Data Privacy Framework and Standard Contractual Clauses). Data is retained according to the Google Analytics retention setting for this property.') +
+          p('Survey responses are collected by <strong>Tally</strong>, a form service based in Belgium that encrypts responses and stores them in Europe.')) +
         sect('The forms on this site', p('If you use the <a class="csl-body-link" href="/contact/">contact form</a> or the Submit a Tool form, what you type (including any email you provide so we can reply) is sent to the site owner&rsquo;s inbox via <strong>Web3Forms</strong>, a form-delivery service. It is used only to respond to you and is not added to any marketing list.')) +
+        sect('The practitioner survey',
+          p('The <a class="csl-body-link" href="/survey/">practitioner survey</a> is optional and does not ask for your name. Results are reported only in aggregate, as totals and percentages. Individual answers are never published, and no group small enough to identify someone is reported on its own.') +
+          p('At the end you can choose to leave your email address. If you do, it is used once, to send you the results when they are published. You only receive news and updates if you tick that box. Responses are kept only as long as needed to analyze and publish the results. If you left an email and want your response deleted, use the <a class="csl-body-link" href="/contact/other/">contact form</a>.')) +
+        sect('Email',
+          p('This site follows the U.S. <strong>CAN-SPAM Act</strong> and similar rules elsewhere. You only get email from us if you have expressly asked for it, for example by ticking the box for news and updates or by asking for survey results. Sending a message through a form never adds you to a list, and your email address is <strong>never sold, rented, or traded</strong>.') +
+          p('Every email we send says clearly who it is from, has an honest subject line, includes a postal address, and has a working unsubscribe link. You can unsubscribe at any time, from any email, by clicking that link or by replying with the word &ldquo;unsubscribe.&rdquo; Requests are honored promptly, and always within 10 business days.')) +
         sect('Your rights', p('You can request access to, correction of, or deletion of your data; object to or restrict processing; and withdraw consent at any time. You also have the right to complain to your local data protection authority. Use the <a class="csl-body-link" href="/contact/">contact form</a> to make a request.')) +
         sect('How to withdraw consent or opt out', '<ul>' + li('Use the <strong>Cookie preferences</strong> link in the footer of any page to change your choice.') + li('Clear cookies / site data in your browser settings.') + li('Install Google&rsquo;s <a class="csl-body-link" href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="nofollow noopener">Analytics opt-out browser add-on</a>.') + '</ul>') +
         '<section style="padding:var(--space-8) 0 var(--space-24)"><p class="prose-body" style="color:var(--text-muted)">Last updated ' + LAST_UPDATED + '.</p></section>' +
       '</div>'
     );
+  }
+
+  // ── SURVEY ── (the Tally practitioner survey, embedded; mirrors /survey/)
+  // The form lives on Tally. Tally's embed script (loaded by mountSurvey, on
+  // this page only) sizes the iframe to the form, so there is no second
+  // scrollbar. It loads the form when it scrolls into view. If the
+  // script cannot load, the iframe gets a plain src and a fixed height.
+  const SURVEY_URL = 'https://tally.so/r/q408Y5';
+  const SURVEY_EMBED = 'https://tally.so/embed/q408Y5?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1';
+  function viewSurvey() {
+    const facts = [['2 min', 'to finish'], ['9', 'short questions'], ['No', 'names asked for'], ['Free', 'results for everyone']]
+      .map((f) => '<li><strong>' + f[0] + '</strong><span>' + f[1] + '</span></li>').join('');
+    const fine = [
+      ['Voluntary.', 'Taking part is up to you, and you can stop at any time.'],
+      ['Anonymous.', 'The survey never asks for your name or your employer&rsquo;s name.'],
+      ['Reported only in aggregate.', 'Results are shared as totals and percentages across everyone who answered. Individual answers are never published, and no group small enough to single someone out is reported on its own.'],
+      ['Email is optional.', 'At the end you can leave your email to get the results. It is used once, to send you the report. You only hear from us beyond that if you tick the news and updates box, and you can unsubscribe at any time.'],
+      ['Never sold.', 'Your answers and your email address are never sold, rented, or shared. There is no sponsor.'],
+      ['Who sees it.', 'Only the library&rsquo;s maintainer. Responses are collected by Tally, a form service based in Belgium that stores data in Europe. The <a class="csl-body-link" href="/privacy/">privacy page</a> has the details.'],
+      ['18 and over.', 'The survey is meant for working professionals aged 18 or older.']
+    ].map((f) => '<li><strong>' + f[0] + '</strong> ' + f[1] + '</li>').join('');
+    const open = !!state.surveyOpen;
+    return shell(
+      '<div class="shell-md survey">' +
+        '<header class="wizard-header dashed-b has-bg-hero">' + bgHero('survey') +
+          '<div class="detail-badge-row"><span class="badge badge--highlight">Practitioner survey</span></div>' +
+          '<h1 class="detail-title" style="font-size:var(--text-4xl);margin-bottom:var(--space-5)">How does content strategy really work where you are?</h1>' +
+          '<p class="about-lede">We&rsquo;d like to hear from content strategy practitioners about how content strategy is actually used in your workplace: the tools your team relies on, the ones it has quietly dropped, how you measure success, and where AI is showing up.</p>' +
+          '<ul class="survey-facts">' + facts + '</ul>' +
+          (open ? '' :
+            '<button type="button" class="btn btn--md btn--highlight" data-action="survey-open" aria-controls="survey-form" aria-expanded="false">Take the survey</button>' +
+            '<p class="survey-cta-note">Anonymous, and reported only in aggregate. <a class="csl-body-link" href="#survey-details">What to know before you start</a></p>') +
+        '</header>' +
+        '<section class="survey-embed" id="survey-form" aria-label="Survey form" tabindex="-1"' + (open ? '' : ' hidden') + '>' +
+          '<p class="survey-embed__loading">Loading the survey&hellip;</p>' +
+          (open ? '<iframe data-tally-src="' + SURVEY_EMBED + '" title="Content strategy practitioner survey" height="600"></iframe>' : '') +
+          '<p class="survey-embed__alt">Form not showing? <a class="csl-body-link" href="' + SURVEY_URL + '" target="_blank" rel="noopener">Open the survey in a new tab</a>.</p>' +
+        '</section>' +
+        '<section class="section" style="padding:var(--space-10) 0;border-bottom:1px dashed var(--border-strong)">' +
+          '<h2 class="section-label" style="margin-bottom:var(--space-5)">Why your answers matter</h2>' +
+          '<div class="prose-stack">' +
+            '<p class="prose-lead">Most of what gets written about content strategy describes how it should work. This survey asks how it does work, in real teams with real deadlines.</p>' +
+            '<p class="prose-body">The more practitioners who answer, the more honest the picture. When the results are published here, free, you will be able to see how your own practice compares with your peers&rsquo;, and which tools in this library people actually use.</p>' +
+          '</div>' +
+        '</section>' +
+        '<section class="section" id="survey-details" style="padding:var(--space-10) 0;border-bottom:1px dashed var(--border-strong)">' +
+          '<h2 class="section-label" style="margin-bottom:var(--space-5)">Before you start</h2>' +
+          '<ul class="survey-fine">' + fine + '</ul>' +
+        '</section>' +
+        '<section style="padding:var(--space-8) 0 var(--space-24)">' +
+          '<p class="prose-body" style="color:var(--text-muted)">Questions about the survey? Use the <a class="csl-body-link" href="/contact/other/">contact form</a>.</p>' +
+        '</section>' +
+      '</div>'
+    );
+  }
+
+  // Tally posts {"event":"Tally.FormLoaded"} once the form has painted.
+  window.addEventListener('message', (e) => {
+    if (e.origin !== 'https://tally.so' || typeof e.data !== 'string' || e.data.indexOf('Tally.FormLoaded') === -1) return;
+    const box = document.querySelector('.survey-embed');
+    if (box) box.classList.add('is-loaded');
+  });
+  let tallyScript = null;
+  function mountSurvey(root) {
+    const frame = root.querySelector('.survey-embed iframe[data-tally-src]');
+    if (!frame) return;
+    if (window.Tally && window.Tally.loadEmbeds) { window.Tally.loadEmbeds(); return; }
+    if (tallyScript) return;
+    tallyScript = document.createElement('script');
+    tallyScript.src = 'https://tally.so/widgets/embed.js';
+    tallyScript.async = true;
+    tallyScript.onload = () => {
+      const f = document.querySelector('.survey-embed iframe[data-tally-src]');
+      if (window.Tally && window.Tally.loadEmbeds) window.Tally.loadEmbeds();
+      else if (f) f.src = f.getAttribute('data-tally-src');
+    };
+    tallyScript.onerror = () => {
+      tallyScript = null;
+      const f = document.querySelector('.survey-embed iframe[data-tally-src]');
+      if (f && !f.src) f.src = f.getAttribute('data-tally-src');
+    };
+    document.head.appendChild(tallyScript);
   }
 
   // ── FAQ ──
@@ -1845,6 +2110,7 @@
       const custOpen = !!state.wsCustomizeOpen;
       brandSection =
         '<section style="padding:var(--space-10) 0 var(--space-12);border-bottom:1px dashed var(--border-strong)">' +
+          '<div class="ws-cust' + (custOpen ? ' is-open' : '') + '">' +
           '<button class="acc-row ws-cust__row" data-action="ws-toggle-customize" aria-expanded="' + custOpen + '">' +
             '<span><span class="ws-cust__title">Customize your strategy</span>' +
             '<span class="ws-cust__sub">Add a success statement, your name, an accent color, and a logo. ' +
@@ -1874,7 +2140,7 @@
           '</div>' +
             logoField() +
           '</div>' +
-          webPanel('workspace', wsIds) +
+          '</div>' +
         '</section>';
 
       exportSection =
@@ -1887,6 +2153,7 @@
             '<button class="btn btn--md btn--secondary" data-action="web-toggle" data-which="workspace">Web version</button>' +
             '<button class="btn btn--md btn--ghost" data-action="ws-export-both">PDF + PowerPoint</button>' +
           '</div>' +
+          webPanel('workspace', wsIds) +
         '</section>';
     }
 
@@ -1934,6 +2201,7 @@
     if (parts[0] === 'terminology') return { view: 'terminology' };
     if (parts[0] === 'workspace') return { view: 'workspace' };
     if (parts[0] === 'privacy') return { view: 'privacy' };
+    if (parts[0] === 'survey') return { view: 'survey' };
     if (parts[0] === 'contact') {
       const TOPICS = ['suggest-a-tool', 'nominate', 'other'];
       const topic = TOPICS.indexOf(parts[1]) !== -1 ? parts[1] : 'suggest-a-tool';
@@ -1968,10 +2236,15 @@
       case 'terminology': html = viewTerminology(); break;
       case 'workspace':  html = viewWorkspace(); break;
       case 'privacy':    html = viewPrivacy(); break;
+      case 'survey':     html = viewSurvey(); break;
       case 'contact':    html = viewContact(); break;
       default:           html = viewIndex();
     }
+    // The homepage filmstrip keeps its own node across in-page re-renders
+    // (search typing, filter chips), so its zoom, clip and confetti carry on.
+    const keepStrip = route.view === 'index' ? app.querySelector('.strip') : null;
     app.innerHTML = html;
+    if (keepStrip) { const fresh = app.querySelector('.strip'); if (fresh) fresh.replaceWith(keepStrip); }
     document.title = pageTitle(route);
     setNoindex(route.view === 'plan');
     // Hydration: drop the prerendered static shell once the app has painted the
@@ -1983,6 +2256,8 @@
     mountNewFlags(app);
     inlineSvgs(app);
     mountConfetti(app);
+    mountFilmstrip(app);
+    mountSurvey(app);
     if (scrollTop) {
       window.scrollTo(0, 0);
       // Real navigation (not an in-view update): move focus to the new content and
@@ -2001,7 +2276,7 @@
       if (u) return u.title + ' · Content Strategy Library';
     }
     if (route.view === 'plan') return 'Content Strategy Approach \u00b7 Content Strategy Library';
-    const map = { plan: 'Content Strategy Approach', updates: 'Updates', awards: 'Best of 2026', recommend: 'Tool Recommender', submit: 'Submit a Tool', about: 'About', faq: 'FAQ', terminology: 'Terminology', workspace: 'Workspace', privacy: 'Privacy & data', contact: 'Contact' };
+    const map = { plan: 'Content Strategy Approach', updates: 'Updates', awards: 'Best of 2026', recommend: 'Tool Recommender', submit: 'Submit a Tool', about: 'About', faq: 'FAQ', terminology: 'Terminology', workspace: 'Workspace', privacy: 'Privacy & data', contact: 'Contact', survey: 'Practitioner Survey' };
     return (map[route.view] ? map[route.view] + ' · ' : '') + 'Content Strategy Library';
   }
 
@@ -2028,13 +2303,16 @@
   // ── Hero drift ──
   // The bg-hero images are near-pinned: they scroll at 0.975x so the header
   // artwork drifts a touch slower than the page instead of sitting dead still.
-  // One passive listener, rAF-throttled, feeding a single custom property.
+  // Browsers with scroll-driven animations do this in CSS (see "Smooth hero
+  // drift" in styles.css), which stays in step with the scroll. Everyone else
+  // gets one passive listener, rAF-throttled, feeding a single custom property.
   (function heroDrift() {
     const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduced) {
       document.documentElement.style.setProperty('--hero-anchor', '0px');
       return;
     }
+    if (window.CSS && CSS.supports && CSS.supports('animation-timeline: scroll()')) return;
     let ticking = false;
     function apply() {
       ticking = false;
@@ -2060,6 +2338,12 @@
     if (!el) return;
     const action = el.getAttribute('data-action');
 
+    // A closed tile opens on the first click; an open one falls through to
+    // the link handler below, which navigates.
+    if (action === 'strip-tile') {
+      if (!stripIsRow() && !el.classList.contains('is-open')) { e.preventDefault(); stripOpenTile(el); }
+      return;
+    }
     if (action === 'nav-toggle') {
       el.closest('.nav').classList.toggle('is-open');
     } else if (action === 'filter') {
@@ -2149,6 +2433,12 @@
       render(false);
       const input = document.getElementById('gloss-search');
       if (input) input.focus();
+    } else if (action === 'survey-open') {
+      state.surveyOpen = true;
+      render(false);
+      scrollToSection('survey-form');
+      const box = document.getElementById('survey-form');
+      if (box) { try { box.focus({ preventScroll: true }); } catch (x) { box.focus(); } }
     } else if (action === 'faq-toggle') {
       const i = el.getAttribute('data-i');
       state.expandedFaq[i] = !state.expandedFaq[i];
@@ -2551,6 +2841,7 @@
     // Fresh navigation to recommend/submit restarts those flows.
     if (href === '/recommend/') { state.wizardStep = 0; state.wizardAnswers = []; }
     if (href === '/submit/') { state.submitSent = false; state.submitError = ''; state.submitSending = false; }
+    if (href === '/survey/') state.surveyOpen = false;
     if (href === '/contact/') { state.contactSent = false; state.contactError = ''; state.contactSending = false; }
     navTo(href);
   });

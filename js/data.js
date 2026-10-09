@@ -27,6 +27,11 @@ window.TOOLS = [
     "tagline": "Halvorson’s scope model: content design and systems design around one core strategy.",
     "visual": "Content design (editorial × experience) over systems design (structure × process), around one core.",
     "summary": "The quad is Brain Traffic’s foundational scope model for the discipline, first drawn in Kristina Halvorson’s Content Strategy for the Web and revised in 2018. The current version puts a core strategy at the center of two hemispheres. Content design, where editorial strategy (mission, audiences, point of view, voice) meets experience design (user needs, journeys, formats). And systems design, where content structure (tags, models, reuse) meets process design (lifecycle, tools, accountability, who says no), drawn underneath on purpose, because systems are the foundation content design stands on. Its job is scoping: it makes visible that a strategy covering only editorial questions ignores half the discipline, and it gives every other tool in this library a place to belong.",
+    "inline": [
+      { "text": "Brain Traffic", "url": "https://www.braintraffic.com/" },
+      { "text": "Kristina Halvorson", "url": "https://en.wikipedia.org/wiki/Kristina_Halvorson" },
+      { "text": "Content Strategy for the Web", "url": "https://www.peachpit.com/store/content-strategy-for-the-web-9780321808301", "title": true }
+    ],
     "whenToUse": [
       "When scoping a content strategy engagement or program, to make sure all four quadrants are covered, or consciously excluded.",
       "When explaining to stakeholders what content strategy actually includes beyond \"writing things.\"",
@@ -84,10 +89,10 @@ window.TOOLS = [
     "notes": [
       {
         "tone": "info",
-        "title": "Content Charter vs. Project Brief",
+        "title": "Content Marketing Charter vs. Project Brief",
         "paras": [
           [
-            "These two are easy to confuse, but they sit at different altitudes. A content charter is a strategic plan: it defines why your content program exists, who it serves, the themes it owns, and how success is measured, and it stays stable over time. A project brief is the specific project details, including the scope, goals, owner, deadline, and requirements for a single deliverable or campaign. Every brief should ladder up to the charter: the brief executes, the charter directs."
+            "These two are easy to confuse, but they sit at different altitudes. A content marketing charter is a strategic plan: it defines why your content program exists, who it serves, the themes it owns, and how success is measured, and it stays stable over time. A project brief is the specific project details, including the scope, goals, owner, deadline, and requirements for a single deliverable or campaign. Every brief should ladder up to the charter: the brief executes, the charter directs."
           ]
         ]
       }
@@ -2124,3 +2129,25 @@ window.SOURCE_NAMES = {
       'asana.com':'Asana','atlassian.com':'Atlassian','salsify.com':'Salsify','clearscope.io':'Clearscope',
       'pnclogos.com':'PNC Digital','siteimprove.com':'Siteimprove','clickworker.com':'clickworker'
     };
+
+/* ============================================================
+   Hero motion graphics.
+   Keyed by tool id. When a tool has an entry here, its detail page
+   swaps the static hero diagram for this video (see js/video.js).
+   `width`/`height` are the intrinsic pixel dimensions, used to reserve
+   the aspect ratio so nothing shifts while the file loads.
+   ============================================================ */
+window.TOOL_VIDEOS = {
+  quad: {
+    src: '/videos/the-content-strategy-quad.mp4',
+    width: 1440,
+    height: 810,
+    label: 'The Content Strategy Quad explainer'
+  },
+  journey: {
+    src: '/videos/customer-journey-map.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Customer Journey Map explainer'
+  }
+};

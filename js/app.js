@@ -28,7 +28,7 @@
   // Bump this when the library's content is updated.
   // Auto-stamped by build.js on every build (see stampLastUpdated). Manual edits
   // here are overwritten on the next `node build.js`.
-  const LAST_UPDATED = 'October 2, 2026';
+  const LAST_UPDATED = 'October 9, 2026';
 
   // Web3Forms endpoint for the "Submit a Tool" form. The access key is public by design
   // (Web3Forms routes it to the maintainer's inbox and handles spam filtering server-side).
@@ -432,7 +432,7 @@
     const h = HEROES[key];
     if (!h) return '';
     opts = opts || {};
-    const cls = 'bg-hero' + (h.dense ? ' bg-hero--dense' : '') + (opts.tall ? ' bg-hero--tall' : '');
+    const cls = 'bg-hero' + (h.dense ? ' bg-hero--dense' : '');
     return '<div class="' + cls + '" aria-hidden="true">' +
         '<img src="' + h.src + '" alt="" style="object-position:' + h.pos + '">' +
         '<div class="bg-hero__veil"></div>' +
@@ -839,11 +839,18 @@
   // ── INDEX ──
   // Free-text match across everything a reader might type: name, tagline,
   // summary, the visual phrase and the category label.
-  function toolMatches(t, q) {
-    if (!q) return true;
-    const hay = [t.name, t.tagline, t.summary, t.visual, t.category].join(' ').toLowerCase();
-    return hay.indexOf(q) !== -1;
+  // How well a tool matches the search: 3 = in its name, 2 = in its one-line
+  // description or category, 1 = only further down (summary, visual line),
+  // 0 = not at all.
+  function toolScore(t, q) {
+    if (!q) return 3;
+    const has = (v) => String(v || '').toLowerCase().indexOf(q) !== -1;
+    if (has(t.name)) return 3;
+    if (has(t.tagline) || has(t.category)) return 2;
+    if (has(t.summary) || has(t.visual)) return 1;
+    return 0;
   }
+  function toolMatches(t, q) { return toolScore(t, q) > 0; }
 
   function viewIndex() {
     const q = (state.toolQuery || '').trim().toLowerCase();
@@ -854,9 +861,24 @@
     }).join('');
 
     // Search and the category chips combine; a category with no hits disappears.
+    // While searching, results drop the category grouping and come ranked:
+    // name or one-line matches first ("Best matches"), then tools that only
+    // mention the word further down ("Also mentioned").
     let shown = 0;
     let order = 0;
-    const cats = window.CATEGORY_ORDER
+    const block = (title, list) => !list.length ? '' :
+      '<div class="cat-block">' +
+        '<div class="cat-head"><h2 class="cat-name">' + esc(title) + '</h2></div>' +
+        '<div class="tool-grid">' + list.map((t) => toolCard(t, order++)).join('') + '</div>' +
+      '</div>';
+    const pool = TOOLS.filter((t) => !state.activeFilter || t.cat === state.activeFilter);
+    const ranked = q ? pool.map((t) => ({ t, s: toolScore(t, q) })).filter((x) => x.s > 0)
+      .sort((a, b) => b.s - a.s) : [];
+    const cats = q
+      ? (shown = ranked.length,
+        block('Best matches', ranked.filter((x) => x.s >= 2).map((x) => x.t)) +
+        block('Also mentioned', ranked.filter((x) => x.s === 1).map((x) => x.t)))
+      : window.CATEGORY_ORDER
       .filter(([, key]) => !state.activeFilter || state.activeFilter === key)
       .map(([name, key]) => {
         const hits = TOOLS.filter((t) => t.cat === key && toolMatches(t, q));
@@ -1134,6 +1156,36 @@
       '</section>';
   }
 
+  // Hero motion graphic, for the handful of tools that have one. Stands in for
+  // the static diagram. Behaviour lives in js/video.js; this only builds markup.
+  function heroVideo(t) {
+    const v = (window.TOOL_VIDEOS || {})[t.id];
+    if (!v) return '';
+    const ICON = (window.CSLVideo && window.CSLVideo.ICON) || { play: '', loop: '' };
+    const btn = (attr, label, icon, extra) =>
+      '<button type="button" class="hero-video__btn" ' + attr +
+        ' aria-label="' + esc(label) + '" title="' + esc(label) + '"' + (extra || '') + '>' + icon + '</button>';
+    return '<figure class="hero-video" data-hero-video>' +
+        '<div class="hero-video__frame" style="aspect-ratio:' + v.width + '/' + v.height + '">' +
+          // #t=0.1 nudges the browser into painting a first frame before playback.
+          '<video class="hero-video__el" src="' + esc(v.src) + '#t=0.1" width="' + v.width + '" height="' + v.height + '"' +
+            ' muted playsinline preload="metadata" aria-label="' + esc(v.label) + '"></video>' +
+          '<div class="hero-video__controls">' +
+            btn('data-hv-playpause', 'Play', ICON.play) +
+            // Range input rather than a bespoke slider: arrow keys, Home/End and
+            // touch dragging all come for free, and it announces properly.
+            '<input type="range" class="hero-video__scrub" data-hv-scrub' +
+              ' min="0" max="100" step="0.05" value="0" aria-label="Seek">' +
+            '<span class="hero-video__time" data-hv-time aria-hidden="true">0:00 / 0:00</span>' +
+            btn('data-hv-loop', 'Loop this video', ICON.loop, ' aria-pressed="false"') +
+          '</div>' +
+        '</div>' +
+        // The video carries what the static diagram used to say, so keep the
+        // phrasing in text for anyone who cannot watch it.
+        (t.visual ? '<figcaption class="hero-video__cap sr-only">' + esc(t.visual) + '</figcaption>' : '') +
+      '</figure>';
+  }
+
   // ── DETAIL ──
   // Copy-link button that sits beside every section heading.
   function sectionAnchor(id) {
@@ -1238,9 +1290,13 @@
     const D = window.CSLToolDetail;
     const diagram = window.buildDiagram(t.id);
 
-    const visual = diagram
-      ? '<div class="detail-diagram">' + diagram + '</div>'
-      : '<div class="detail-callout"><p>' + esc(t.visual) + '</p></div>';
+    // A motion graphic wins over the static diagram, which wins over the callout.
+    const video = heroVideo(t);
+    const visual = video
+      ? '<div class="detail-diagram">' + video + '</div>'
+      : diagram
+        ? '<div class="detail-diagram">' + diagram + '</div>'
+        : '<div class="detail-callout"><p>' + esc(t.visual) + '</p></div>';
 
     const when = t.whenToUse.map((text) =>
       '<div class="when-item"><span class="diamond"></span><p>' + esc(text) + '</p></div>'
@@ -1263,7 +1319,7 @@
 
     return shell(
       '<div class="shell-md">' +
-        '<header class="detail-header dashed-b has-bg-hero">' + bgHero('home', { tall: true }) +
+        '<header class="detail-header dashed-b has-bg-hero">' + bgHero('home') +
           '<div class="detail-badge-row"><span class="badge badge--default">' + esc(t.category) + '</span>' + newFlag + '</div>' +
           '<div class="detail-headline">' +
             '<div class="detail-glyph">' + esc(t.glyph) + '</div>' +
@@ -1277,7 +1333,7 @@
         '<section class="sec dashed-b" id="what-is-it">' +
           contentsCard(t, hasTemplate) +
           sectionHead('what-is-it', D ? D.whatTitle(t) : 'What is it?') +
-          '<p class="sec__lede">' + esc(t.summary) + '</p>' +
+          '<p class="sec__lede">' + (D ? D.linkPhrases(t.summary, t.inline, 'csl-body-link') : esc(t.summary)) + '</p>' +
         '</section>' +
         '<section class="sec dashed-b" id="when-to-use">' +
           sectionHead('when-to-use', D ? D.whenTitle(t) : 'When should I use it?') +
@@ -2257,6 +2313,7 @@
     const pre = document.getElementById('prerender');
     if (pre) pre.remove();
     // Wire up any hero video this route just painted (no-op when there is none).
+    if (window.CSLVideo) window.CSLVideo.mount(app);
     openDeepLink(route);
     mountNewFlags(app);
     inlineSvgs(app);
@@ -2275,14 +2332,14 @@
   }
 
   function pageTitle(route) {
-    if (route.view === 'detail' && BY_ID[route.id]) return BY_ID[route.id].name + ' · Content Strategy Library';
+    if (route.view === 'detail' && BY_ID[route.id]) return BY_ID[route.id].name + ', Content Strategy Library';
     if (route.view === 'update') {
       const u = (window.UPDATES || []).filter((x) => x.slug === route.slug)[0];
-      if (u) return u.title + ' · Content Strategy Library';
+      if (u) return u.title + ', Content Strategy Library';
     }
-    if (route.view === 'plan') return 'Content Strategy Approach \u00b7 Content Strategy Library';
+    if (route.view === 'plan') return 'Content Strategy Approach, Content Strategy Library';
     const map = { plan: 'Content Strategy Approach', updates: 'Updates', awards: 'Best of 2026', recommend: 'Tool Recommender', submit: 'Submit a Tool', about: 'About', faq: 'FAQ', terminology: 'Terminology', workspace: 'Workspace', privacy: 'Privacy & data', contact: 'Contact', survey: 'Practitioner Survey' };
-    return (map[route.view] ? map[route.view] + ' · ' : '') + 'Content Strategy Library';
+    return (map[route.view] ? map[route.view] + ', ' : '') + 'Content Strategy Library';
   }
 
   // NEW flags hold at opacity 0 until their card is properly on screen, then
@@ -2321,7 +2378,10 @@
     let ticking = false;
     function apply() {
       ticking = false;
-      document.documentElement.style.setProperty('--hero-anchor', (window.scrollY * 0.975) + 'px');
+      const y = window.scrollY;
+      document.documentElement.style.setProperty('--hero-anchor', (y * 0.975) + 'px');
+      // Header photo parallax (pinned, rises at 2.5% of the scroll speed).
+      document.documentElement.style.setProperty('--hero-shift', (-Math.min(y, 20000) * 0.025) + 'px');
     }
     window.addEventListener('scroll', () => {
       if (ticking) return;

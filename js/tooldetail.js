@@ -14,19 +14,59 @@
 
   var SITE = 'https://contentstrategylibrary.com';
 
-  // Tools whose headings read better with a specific noun phrase. Anything not
-  // listed falls back to "What is it?" / "When should I use it?".
-  var SHORT = {
-    pillars: 'content pillars',
-    clusters: 'topic clusters',
-    calendar: 'an editorial calendar',
-    brief: 'a content brief',
-    charter: 'a content charter',
-    mission: 'an editorial mission statement',
-    voicetone: 'a voice and tone guide',
-    raci: 'a RACI chart',
-    audit: 'a content audit'
+  // How each tool is named in its two section headings: "What is the Content
+  // Strategy Quad?" / "When should I use the Content Strategy Quad?". Slashed
+  // names keep their main half; plurals take "are". The Contents card keeps
+  // the short "What is it?" / "When should I use it?" (see sections()).
+  var HEAD = {
+    quad: 'the Content Strategy Quad',
+    charter: 'the Content Marketing Charter',
+    mission: 'the Editorial Mission Statement',
+    pillars: ['Content Pillars', 'are'],
+    taya: 'They Ask, You Answer',
+    audit: 'the Content Audit',
+    rot: 'ROT Analysis',
+    gap: 'Competitive Content Gap Analysis',
+    swot: 'the Content SWOT',
+    maturity: 'the Content Marketing Maturity Model',
+    persona: ['Audience Personas', 'are'],
+    journey: 'the Customer Journey Map',
+    jtbd: 'Jobs-to-be-Done',
+    voc: 'Voice-of-Customer Research',
+    stdc: 'See-Think-Do-Care',
+    corestatement: 'the Core Strategy Statement',
+    voicetone: 'the Brand Voice and Tone Guide',
+    pov: 'a Point of View',
+    archetypes: ['Brand Archetypes', 'are'],
+    matrix: 'the Content Matrix',
+    clusters: ['Topic Clusters', 'are'],
+    keywords: 'the Keyword Map',
+    model: 'the Content Model',
+    calendar: 'the Editorial Calendar',
+    brief: 'the Content Brief',
+    workflow: 'the Content Workflow',
+    raci: 'the RACI Matrix',
+    styleguide: 'the Editorial Style Guide',
+    contributors: ['Contributor Guidelines', 'are'],
+    backlog: 'the Idea Backlog',
+    channels: 'the Channel Strategy Matrix',
+    peso: 'the PESO Model',
+    herohubhelp: 'Hero-Hub-Help',
+    repurposing: 'the Repurposing Matrix',
+    governance: 'the Content Governance Plan',
+    kpi: 'the KPI Framework',
+    lifecycle: 'the Content Lifecycle Plan',
+    scorecard: 'the Content Quality Scorecard',
+    sitemap: 'Information Architecture',
+    cardsort: 'Card Sorting',
+    coremodel: 'the Core Model',
+    contentdesign: 'Content Design'
   };
+  function head(tool) {
+    var h = HEAD[tool.id];
+    if (!h) return { name: 'it', verb: 'is' };
+    return typeof h === 'string' ? { name: h, verb: 'is' } : { name: h[0], verb: h[1] };
+  }
 
   // Only these have Notion/Miro templates worth advertising.
   var HAS_APPS = ['pillars', 'calendar', 'brief', 'journey', 'persona', 'charter', 'clusters'];
@@ -41,14 +81,12 @@
   }
 
   function whatTitle(tool) {
-    var s = SHORT[tool.id];
-    if (!s) return 'What is it?';
-    return (/^(a|an) /.test(s) ? 'What is ' : 'What are ') + s + '?';
+    var h = head(tool);
+    return 'What ' + h.verb + ' ' + h.name + '?';
   }
 
   function whenTitle(tool) {
-    var s = SHORT[tool.id];
-    return s ? 'When should I use ' + s + '?' : 'When should I use it?';
+    return 'When should I use ' + head(tool).name + '?';
   }
 
   function hasApps(tool) { return HAS_APPS.indexOf(tool.id) !== -1; }
@@ -97,11 +135,13 @@
     };
   }
 
-  // Section ids are public deep links; build.js prerenders them too.
+  // Section ids are public deep links; build.js prerenders them too. These
+  // labels feed the Contents card, which stays short on purpose; the headings
+  // themselves name the tool (whatTitle / whenTitle).
   function sections(tool, opts) {
     opts = opts || {};
-    var out = [{ id: 'what-is-it', label: whatTitle(tool) },
-               { id: 'when-to-use', label: whenTitle(tool) }];
+    var out = [{ id: 'what-is-it', label: 'What is it?' },
+               { id: 'when-to-use', label: 'When should I use it?' }];
     if (tool.notes && tool.notes.length) out.push({ id: 'notes', label: 'Notes' });
     out.push({ id: 'template', label: opts.hasTemplate ? 'Download the template' : 'Share and cite' });
     out.push({ id: 'learn-more', label: 'Learn more' });
@@ -127,8 +167,36 @@
     return items.slice(0, at + 1).concat(subs, items.slice(at + 1));
   }
 
+  // Turns chosen phrases in a tool's prose into outbound links, the first time
+  // each appears. `links` is the tool's `inline` list in js/data.js:
+  // [{ text, url, title }], where `title: true` italicizes a book or article
+  // title. Pass raw text; everything is escaped here. `cls` is the app's link
+  // class (the prerendered page passes none).
+  function linkPhrases(text, links, cls) {
+    text = String(text || '');
+    var hits = [];
+    (links || []).forEach(function (l) {
+      var at = text.indexOf(l.text);
+      if (at >= 0) hits.push({ at: at, end: at + l.text.length, link: l });
+    });
+    hits.sort(function (a, b) { return a.at - b.at; });
+    var out = '';
+    var pos = 0;
+    hits.forEach(function (h) {
+      if (h.at < pos) return; // overlaps an earlier link; keep the first
+      var label = esc(h.link.text);
+      if (h.link.title) label = '<cite>' + label + '</cite>';
+      out += esc(text.slice(pos, h.at)) +
+        '<a' + (cls ? ' class="' + cls + '"' : '') + ' href="' + esc(h.link.url) + '"' +
+        ' target="_blank" rel="noopener">' + label + '</a>';
+      pos = h.end;
+    });
+    return out + esc(text.slice(pos));
+  }
+
   root.CSLToolDetail = {
-    SHORT: SHORT,
+    linkPhrases: linkPhrases,
+    HEAD: HEAD,
     whatTitle: whatTitle,
     whenTitle: whenTitle,
     hasApps: hasApps,

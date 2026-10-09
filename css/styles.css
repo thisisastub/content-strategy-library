@@ -4,6 +4,7 @@
    DESIGN TOKENS
    ============================================================ */
 :root {
+  --nav-h: 59px;        /* where page headers start: the sticky nav plus the gap below it */
   --bg-hero-h: 345px;   /* header photo: fades out ~400px down the page */
   /* ─── Ink scale, warm neutrals ──────────────── */
   --ink-25:   #F8F7F2;
@@ -145,7 +146,6 @@ a {
   to   { opacity: 1; transform: none; }
 }
 
-#app > * { animation: fadeUp 240ms ease both; }
 
 /* ── Accessibility utilities ──────────────────────────── */
 /* Keyboard-only focus ring: nothing on mouse click, a clear ring on Tab. */
@@ -190,19 +190,25 @@ a {
 
 /* ============================================================
    BG HERO
-   Full-bleed image behind a page header only, near-pinned on scroll
-   via --hero-anchor (set by js/app.js), fading into the page at the
-   header's bottom border. The nav itself never moves.
+   Full-bleed image behind a page header, pinned to the window and
+   rising at 2.5% of the scroll speed (the page slides over an almost
+   still photo). Because it is pinned and only ever moves up,
+   a late frame can never open a gap above it. It starts at the very
+   top, behind the nav, and fades into the page --bg-hero-h below where
+   page headers start. See "Header photo parallax" for the motion.
    ============================================================ */
 .bg-hero {
-  position: absolute;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   /* One fade length for every page, not the header's own height, so the
-     photo fades out at the same distance down the page everywhere. */
-  height: var(--bg-hero-h);
-  left: 50%;
-  width: 100vw;
-  transform: translate3d(-50%, var(--hero-anchor, 0px), 0);
+     photo fades out at the same distance down the page everywhere. The
+     nav height is added because the photo now starts behind the nav. */
+  height: calc(var(--bg-hero-h) + var(--nav-h));
+  /* Fallback motion for browsers without scroll-driven animations; js/app.js
+     sets --hero-shift. Scroll-driven browsers override this below. */
+  transform: translate3d(0, var(--hero-shift, 0px), 0);
   will-change: transform;
   z-index: -1;
   overflow: hidden;
@@ -216,9 +222,6 @@ a {
   object-fit: cover;
   display: block;
 }
-/* Tool pages anchor the image to the top and give it a floor, so short headers
-   still show the architecture rather than a crop of the ceiling. */
-.bg-hero--tall img { height: max(100%, 640px); inset: 0 0 auto 0; }
 .bg-hero__veil {
   position: absolute;
   inset: 0;
@@ -1705,6 +1708,206 @@ select.input { cursor: pointer; padding: 0 12px; }
 }
 
 /* ============================================================
+   HERO VIDEO
+   Motion graphic that replaces the static diagram on some tool
+   pages. Behaviour in js/video.js, markup in js/app.js + build.js.
+   ============================================================ */
+.hero-video { margin: 0; }
+/* The motion graphics sit on near-black (#0F1009), so the frame matches rather
+   than flashing the diagrams' yellow behind a video that has not painted yet. */
+.hero-video__frame {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--ink-950);
+  line-height: 0;
+}
+.hero-video__cap {
+  margin-top: var(--space-4);
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  line-height: var(--leading-normal);
+}
+.hero-video__el {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  background: var(--ink-950);
+}
+
+/* A bar across the foot of the frame. The bar itself never steals a tap, only
+   the controls inside it, so a tap on the video surface still reaches the
+   <video> and toggles playback. The scrim keeps it legible over any frame. */
+.hero-video__controls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-12) var(--space-4) var(--space-4);
+  background: linear-gradient(to top, rgba(8, 8, 4, 0.88), rgba(8, 8, 4, 0.55) 45%, rgba(8, 8, 4, 0));
+  line-height: var(--leading-normal);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity 180ms ease, transform 180ms ease, visibility 180ms;
+}
+.hero-video__btn {
+  pointer-events: auto;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid rgba(22, 22, 14, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--text-primary);
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(8, 8, 4, 0.35);
+  transition: background 140ms ease, transform 140ms ease;
+}
+.hero-video__btn:hover { background: #fff; transform: translateY(-1px); }
+.hero-video__btn svg { display: block; }
+/* White ring, not the page's ink one: the offset gap sits on the dark scrim,
+   where a dark ring would disappear. */
+.hero-video__btn:focus-visible,
+.hero-video__scrub:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+/* Loop engaged reads as the marker yellow, matching the rest of the library. */
+.hero-video.is-looping .hero-video__btn[data-hv-loop] {
+  background: var(--highlight);
+  border-color: var(--highlight-deep);
+}
+
+/* ── Playhead ── */
+.hero-video__time {
+  flex: none;
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-wide);
+  color: rgba(255, 255, 255, 0.92);
+  white-space: nowrap;
+}
+.hero-video__scrub {
+  pointer-events: auto;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+/* WebKit has no native "elapsed" fill, so the track paints it from --hv-pct,
+   which js/video.js keeps in sync. Firefox uses ::-moz-range-progress instead. */
+.hero-video__scrub::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--highlight) 0 var(--hv-pct, 0%),
+    rgba(255, 255, 255, 0.3) var(--hv-pct, 0%) 100%
+  );
+}
+.hero-video__scrub::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  margin-top: -4px;
+  border: none;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(8, 8, 4, 0.5);
+}
+.hero-video__scrub::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.3);
+}
+.hero-video__scrub::-moz-range-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--highlight);
+}
+.hero-video__scrub::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: none;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(8, 8, 4, 0.5);
+}
+
+/* Pointer devices: hover or keyboard focus reveals the controls, and a paused
+   or finished video keeps them up so the state is never a mystery. */
+.hero-video:hover .hero-video__controls,
+.hero-video:focus-within .hero-video__controls,
+.hero-video.is-paused .hero-video__controls,
+.hero-video.is-ended .hero-video__controls,
+.hero-video.hv-show .hero-video__controls {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+/* Touch devices: js/video.js alone decides, so the controls can fade back out
+   after a tap even while the video sits paused. */
+.hero-video.is-touch .hero-video__controls {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+}
+.hero-video.is-touch.hv-show .hero-video__controls {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+/* Reduced motion, or an autoplay the browser refused: nothing is going to start
+   on its own, so the controls stay put as the only way in. */
+.hero-video.is-reduced .hero-video__controls,
+.hero-video.is-blocked .hero-video__controls,
+.hero-video.is-touch.is-reduced .hero-video__controls,
+.hero-video.is-touch.is-blocked .hero-video__controls {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+/* No-JS / prerendered fallback: native controls, nothing to overlay. */
+.hero-video--static .hero-video__el { cursor: default; }
+
+@media (max-width: 560px) {
+  .hero-video__controls { gap: var(--space-2); padding: var(--space-10) var(--space-3) var(--space-3); }
+  .hero-video__btn { width: 44px; height: 44px; }
+  /* Taller hit area for a thumb-sized drag; the track stays 4px. */
+  .hero-video__scrub { height: 28px; }
+  .hero-video__scrub::-webkit-slider-thumb { width: 14px; height: 14px; margin-top: -5px; }
+  .hero-video__scrub::-moz-range-thumb { width: 14px; height: 14px; }
+}
+/* Very narrow frames: the readout is the first thing to go, the scrubber stays. */
+@media (max-width: 380px) {
+  .hero-video__time { display: none; }
+}
+
+/* ============================================================
    DIAGRAMS
    ============================================================ */
 .dgm-wrap { background: var(--bg-mark); border-radius: 10px; padding: 32px 36px; }
@@ -2342,17 +2545,20 @@ select.input { cursor: pointer; padding: 0 12px; }
    by a frame (the old scroll listener did, which read as a small bounce).
    Rate is unchanged: 0.975px of drift per 1px of scroll, over a range long
    enough for any page. Other browsers keep the --hero-anchor fallback. */
-@keyframes bgHeroDrift {
-  from { transform: translate3d(-50%, 0, 0); }
-  to   { transform: translate3d(-50%, 19500px, 0); }
-}
 @keyframes awardsDrift {
   from { transform: translate3d(0, 0, 0); }
   to   { transform: translate3d(0, 19500px, 0); }
 }
+/* Header photo parallax: 0.025px up per 1px of scroll, over a range long
+   enough for any page, so it stays behind the content all the way down.
+   Runs on the compositor, in step with the scroll. */
+@keyframes bgHeroParallax {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(0, -500px, 0); }
+}
 @supports (animation-timeline: scroll()) {
   .bg-hero {
-    animation: bgHeroDrift linear both;
+    animation: bgHeroParallax linear both;
     animation-timeline: scroll(root block);
     animation-range: 0px 20000px;
   }

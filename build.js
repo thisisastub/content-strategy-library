@@ -390,6 +390,7 @@ function bootScripts() {
     '<script src="/js/tooldetail.js"></script>',
     '<script src="/js/updates.js"></script>',
     '<script src="/js/plan.js"></script>',
+    '<script src="/js/video.js"></script>',
     '<script src="/js/templates.js"></script>',
     '<script src="/js/consent.js" defer></script>',
     '<script src="/js/app.js"></script>',
@@ -456,6 +457,25 @@ function graph(pageNodes, breadcrumbItems) {
   return { '@context': 'https://schema.org', '@graph': nodes };
 }
 
+/* ------------------------------------------------------------
+   Hero motion graphic, prerendered form.
+
+   Deliberately plainer than the SPA player in js/app.js: nothing
+   autoplays and nothing preloads, because the SPA replaces this
+   markup the moment it hydrates. Native controls keep the video
+   usable for crawlers and for anyone without JavaScript.
+   ------------------------------------------------------------ */
+function heroVideoStatic(data, tool) {
+  const v = (data.TOOL_VIDEOS || {})[tool.id];
+  if (!v) return '';
+  return '  <figure class="hero-video hero-video--static">' +
+    '<div class="hero-video__frame" style="aspect-ratio:' + v.width + '/' + v.height + '">' +
+    '<video class="hero-video__el" src="' + escAttr(v.src) + '" width="' + v.width + '" height="' + v.height + '"' +
+    ' controls muted playsinline preload="none" aria-label="' + escAttr(v.label) + '"></video></div>' +
+    (tool.visual ? '<figcaption class="hero-video__cap sr-only">' + esc(tool.visual) + '</figcaption>' : '') +
+    '</figure>';
+}
+
 /* ============================================================
    PAGE: tool
    ============================================================ */
@@ -490,9 +510,11 @@ function renderToolPage(data, tool) {
     '  <h1>' + esc(tool.name) + '</h1>',
     // Answer-first: summary is the first paragraph after the H1.
     '  <section id="what-is-it"><h2>' + esc(toolDetail().whatTitle(tool)) + '</h2>',
-    '  <p class="pr-summary">' + esc(tool.summary) + '</p></section>',
+    '  <p class="pr-summary">' + toolDetail().linkPhrases(tool.summary, tool.inline) + '</p></section>',
     '  <p class="pr-tagline"><strong>' + esc(tool.tagline) + '</strong></p>',
-    tool.visual ? '  <p class="pr-visual">' + esc(tool.visual) + '</p>' : '',
+    // The video carries its own caption, so the standalone visual line would double up.
+    heroVideoStatic(data, tool),
+    (tool.visual && !(data.TOOL_VIDEOS || {})[tool.id]) ? '  <p class="pr-visual">' + esc(tool.visual) + '</p>' : '',
     whenTo ? '  <section id="when-to-use"><h2>' + esc(toolDetail().whenTitle(tool)) + '</h2>\n    <ul>\n      ' + whenTo + '\n    </ul>\n  </section>' : '',
     notes ? '  <section id="notes"><h2>Notes</h2>\n    ' + notes + '\n  </section>' : '',
     links ? '  <section><h2>Learn more &amp; sources</h2>\n    <ul class="pr-links">\n      ' + links + '\n    </ul>\n  </section>' : '',

@@ -2593,3 +2593,43 @@ select.input { cursor: pointer; padding: 0 12px; }
 @media (max-width: 719px) {
   :root { --bg-hero-h: 607px; }
 }
+
+/* Survey tile: solid highlight yellow with an ink clipboard, so it reads as
+   different from the photo tiles even when closed. Text and arrow flip to
+   ink; the dark text gradient is dropped. The check marks and X draw in one
+   after another each time the tile opens. */
+.strip-tile--yellow { background: var(--highlight); color: var(--ink-950); }
+.strip-tile--yellow::after { display: none; }
+.strip-tile--yellow .strip-tile__art { filter: none; }
+.strip-tile__art--icon {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 6%;
+  color: var(--ink-950);
+  opacity: 0;
+  transition: opacity 300ms ease, transform 700ms ease;
+}
+.strip-tile--yellow.is-open .strip-tile__art--icon { opacity: 1; transition: opacity 400ms ease 150ms, transform 40s cubic-bezier(.1, .45, .2, 1); }
+.strip-icon { height: 62%; width: auto; overflow: visible; }
+.strip-icon__clip, .strip-icon__pencil { fill: var(--highlight); }
+.strip-icon .m { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.strip-tile--yellow.is-open .strip-icon .m { animation: stripTick 420ms ease-out forwards; }
+.strip-tile--yellow.is-open .strip-icon .m1 { animation-delay: 600ms; }
+.strip-tile--yellow.is-open .strip-icon .m2 { animation-delay: 1000ms; }
+.strip-tile--yellow.is-open .strip-icon .m3 { animation-delay: 1400ms; }
+.strip-tile--yellow.is-open .strip-icon .m4 { animation-delay: 1800ms; }
+@keyframes stripTick { to { stroke-dashoffset: 0; } }
+.strip-tile--yellow .strip-tile__vlabel,
+.strip-tile--yellow .strip-tile__label,
+.strip-tile--yellow .strip-tile__title { color: var(--ink-950); }
+.strip-tile--yellow .strip-tile__go { background: var(--ink-950); color: var(--highlight); }
+@media (max-width: 719px), (hover: none) {
+  .strip-tile__art--icon { opacity: 1; padding-top: 4%; }
+  .strip-icon { height: 56%; }
+  .strip-icon .m { stroke-dashoffset: 0; animation: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .strip-icon .m { stroke-dashoffset: 0; animation: none !important; }
+  .strip-tile__art--icon { transition: none; }
+}

@@ -57,7 +57,7 @@
     copiedAnchor: '',
     copiedText: '',
     wsCustomizeOpen: false,
-    stripOpen: 0,         // homepage filmstrip: open tile (the survey)
+    stripOpen: 0,         // homepage filmstrip: open tile (first in order)
     surveyOpen: false,    // survey page: form revealed by "Take the survey"
     // Logo lives in memory only, never in localStorage.
     wsLogo: null,
@@ -651,6 +651,10 @@
   // ── IMAGERY CREDITS ──
   // Every photograph used on the site, with where it appears and who took it.
   const CREDITS = [
+    { thumb: '/images/survey-icon.svg', contain: true,
+      where: 'Survey icon, homepage', go: '/',
+      who: 'Omah Icon', site: 'The Noun Project',
+      url: 'https://thenounproject.com/icon/survey-7736041/' },
     { thumb: '/images/library-icon.png', contain: true,
       where: 'Library icon, top nav', go: 'top',
       who: 'Soetarman Atmodjo', site: 'The Noun Project',
@@ -664,7 +668,7 @@
     { thumb: '/images/heroes/updates.webp', where: 'Updates header', go: '/updates/',
       who: 'tama66', site: 'Pixabay',
       url: 'https://pixabay.com/photos/typewriter-write-old-vintage-8622984/' },
-    { thumb: '/images/heroes/faq.webp', where: 'FAQ and Survey headers, homepage Survey tile', go: '/faq/',
+    { thumb: '/images/heroes/faq.webp', where: 'FAQ and Survey headers', go: '/faq/',
       who: 'Pavel Danilyuk', site: 'Pexels',
       url: 'https://www.pexels.com/photo/a-woman-in-white-shirt-raising-her-hand-8761544/' },
     { thumb: '/images/heroes/about.webp', where: 'About header', go: '/about/',
@@ -941,11 +945,17 @@
   // The Best of 2026 tile plays the clapping clip and confetti while open.
   // The Workspace photo is a placeholder (the Terminology header image).
   const STRIP = [
-    { href: '/survey/', label: 'Practitioner survey', title: 'Take the survey', img: '/images/strip/survey.webp', pos: 'center top' },
     { href: '/workspace/', label: 'Workspace', title: 'Build your plan', img: '/images/strip/workspace.webp', pos: 'center 50%' },
+    // Solid highlight yellow so it stands out among the photo tiles.
+    { href: '/survey/', label: 'Practitioner survey', title: 'Take the survey', icon: 'survey', vlabel: 'Take the survey' },
     { href: '/recommend/', label: 'Tool Recommender', title: 'Find your tools', img: '/images/strip/recommender.webp', pos: 'center 45%' },
     { href: '/best-of-2026/', label: 'Best of 2026', title: 'Nominations open', svg: '/images/best-of-2026-badge.svg', video: '/images/best-of-2026-hero.mp4' }
   ];
+  // "Survey" by Omah Icon, The Noun Project (CC BY), redrawn as a vector so it
+  // stays sharp at tile size and its marks can draw themselves in.
+  const STRIP_ICONS = {
+    survey: '<svg class="strip-icon" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="16" y="14" width="54" height="78" rx="7"/><rect class="strip-icon__clip" x="32" y="8" width="22" height="12" rx="4"/><path class="m m1" pathLength="1" d="M25 34.5l4.5 4.5 9-9"/><path class="m m2" pathLength="1" d="M25 49.5l4.5 4.5 9-9"/><path class="m m3" pathLength="1" d="M26 60l9 9M35 60l-9 9"/><path class="m m4" pathLength="1" d="M25 79.5l4.5 4.5 9-9"/><path d="M45 35h17M45 50h17M45 65h17M45 80h17"/><g transform="rotate(32 76 52)"><path class="strip-icon__pencil" d="M70 22h12v44l-6 11-6-11z"/><path d="M70 30h12M70 66h12"/></g></svg>'
+  };
   const STRIP_MS = 7000;
   const STRIP_ROW = '(max-width: 719px), (hover: none)';
   const stripIsRow = () => !!(window.matchMedia && window.matchMedia(STRIP_ROW).matches);
@@ -954,8 +964,10 @@
     const open = state.stripOpen;
     const arrow = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
     const tiles = STRIP.map((t, i) =>
-      '<a class="strip-tile' + (t.video ? ' strip-tile--live' : '') + (i === open ? ' is-open' : '') + '" href="' + t.href + '" data-action="strip-tile" data-i="' + i + '" aria-label="' + esc(t.label + ': ' + t.title) + '">' +
-        (t.svg
+      '<a class="strip-tile' + (t.video ? ' strip-tile--live' : '') + (t.icon ? ' strip-tile--yellow' : '') + (i === open ? ' is-open' : '') + '" href="' + t.href + '" data-action="strip-tile" data-i="' + i + '" aria-label="' + esc(t.label + ': ' + t.title) + '">' +
+        (t.icon
+          ? '<span class="strip-tile__art strip-tile__art--icon" aria-hidden="true">' + STRIP_ICONS[t.icon] + '</span>'
+          : t.svg
           ? '<span class="strip-tile__art" data-inline-svg="' + t.svg + '" data-svg-fit="slice" aria-hidden="true"></span>'
           : '<img class="strip-tile__art" src="' + t.img + '" alt="" decoding="async" style="object-position:' + t.pos + '">') +
         (t.video
@@ -965,7 +977,7 @@
               '<span class="strip-tile__badge" data-inline-svg="' + t.svg + '"></span>' +
             '</span>'
           : '') +
-        '<span class="strip-tile__vlabel" aria-hidden="true">' + esc(t.label) + '</span>' +
+        '<span class="strip-tile__vlabel" aria-hidden="true">' + esc(t.vlabel || t.label) + '</span>' +
         '<span class="strip-tile__body" aria-hidden="true">' +
           '<span class="strip-tile__text">' +
             '<span class="strip-tile__label">' + esc(t.label) + '</span>' +

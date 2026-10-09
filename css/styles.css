@@ -2085,7 +2085,19 @@ select.input { cursor: pointer; padding: 0 12px; }
   line-height: 1;
   transition: border-color 120ms;
 }
-.tpl-btn:hover { border-color: var(--highlight-deep); }
+/* On the yellow template card the usual yellow sweep would vanish, so these
+   buttons sweep in ink instead, with yellow text (the reverse highlight). */
+.tpl-card .tpl-btn.ds-highlight-swipe {
+  background-image: linear-gradient(var(--ink-950), var(--ink-950));
+  transition: background-size 300ms cubic-bezier(.4, 0, .2, 1), color 120ms, border-color 120ms;
+}
+.tpl-card .tpl-btn.ds-highlight-swipe:hover,
+.tpl-card .tpl-btn.ds-highlight-swipe:focus-visible {
+  background-position: left center;
+  background-size: 100% 100%;
+  color: var(--highlight);
+  border-color: var(--ink-950);
+}
 .tpl-card__notes {
   margin: 0;
   padding: 0 0 0 18px;

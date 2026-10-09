@@ -2149,5 +2149,11 @@ window.TOOL_VIDEOS = {
     width: 1440,
     height: 810,
     label: 'Customer Journey Map explainer'
+  },
+  raci: {
+    src: '/videos/raci-matrix.mp4',
+    width: 1440,
+    height: 810,
+    label: 'RACI Matrix explainer'
   }
 };

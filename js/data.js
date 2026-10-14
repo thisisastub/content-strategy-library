@@ -2150,6 +2150,54 @@ window.TOOL_VIDEOS = {
     height: 810,
     label: 'Customer Journey Map explainer'
   },
+  persona: {
+    src: '/videos/audience-personas.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Audience Personas explainer'
+  },
+  voicetone: {
+    src: '/videos/brand-voice-tone-guide.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Brand Voice and Tone Guide explainer'
+  },
+  maturity: {
+    src: '/videos/content-marketing-maturity-model.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Content Marketing Maturity Model explainer'
+  },
+  jtbd: {
+    src: '/videos/jobs-to-be-done-value-prop-canvas.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Jobs-to-be-Done explainer'
+  },
+  corestatement: {
+    src: '/videos/core-strategy-statement-messaging-framework.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Core Strategy Statement and Messaging Framework explainer'
+  },
+  pov: {
+    src: '/videos/point-of-view-pov.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Point of View explainer'
+  },
+  stdc: {
+    src: '/videos/see-think-do-care-stdc.mp4',
+    width: 1440,
+    height: 810,
+    label: 'See-Think-Do-Care explainer'
+  },
+  voc: {
+    src: '/videos/voice-of-customer-message-mining.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Voice-of-Customer explainer'
+  },
   raci: {
     src: '/videos/raci-matrix.mp4',
     width: 1440,

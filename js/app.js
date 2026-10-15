@@ -28,7 +28,7 @@
   // Bump this when the library's content is updated.
   // Auto-stamped by build.js on every build (see stampLastUpdated). Manual edits
   // here are overwritten on the next `node build.js`.
-  const LAST_UPDATED = 'October 14, 2026';
+  const LAST_UPDATED = 'October 15, 2026';
 
   // Web3Forms endpoint for the "Submit a Tool" form. The access key is public by design
   // (Web3Forms routes it to the maintainer's inbox and handles spam filtering server-side).

@@ -2198,6 +2198,96 @@ window.TOOL_VIDEOS = {
     height: 810,
     label: 'Voice-of-Customer explainer'
   },
+  archetypes: {
+    src: '/videos/brand-archetypes.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Brand Archetypes explainer'
+  },
+  channels: {
+    src: '/videos/channel-strategy-distribution-matrix.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Channel Strategy explainer'
+  },
+  governance: {
+    src: '/videos/content-governance-plan.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Content Governance Plan explainer'
+  },
+  lifecycle: {
+    src: '/videos/content-lifecycle-refresh-plan.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Content Lifecycle and Refresh Plan explainer'
+  },
+  matrix: {
+    src: '/videos/content-matrix-content-map.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Content Matrix explainer'
+  },
+  model: {
+    src: '/videos/content-model-taxonomy.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Content Model explainer'
+  },
+  contributors: {
+    src: '/videos/contributor-freelancer-guidelines.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Contributor Guidelines explainer'
+  },
+  calendar: {
+    src: '/videos/editorial-calendar.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Editorial Calendar explainer'
+  },
+  herohubhelp: {
+    src: '/videos/hero-hub-help.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Hero-Hub-Help explainer'
+  },
+  backlog: {
+    src: '/videos/idea-backlog-prioritization-rice-ice.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Idea Backlog and Prioritization explainer'
+  },
+  kpi: {
+    src: '/videos/kpi-measurement-framework.mp4',
+    width: 1440,
+    height: 810,
+    label: 'KPI Framework explainer'
+  },
+  keywords: {
+    src: '/videos/keyword-map.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Keyword Map explainer'
+  },
+  peso: {
+    src: '/videos/the-peso-model.mp4',
+    width: 1440,
+    height: 810,
+    label: 'PESO Model explainer'
+  },
+  repurposing: {
+    src: '/videos/repurposing-atomization-matrix.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Repurposing Matrix explainer'
+  },
+  clusters: {
+    src: '/videos/topic-clusters-pillar-map.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Topic Clusters explainer'
+  },
   raci: {
     src: '/videos/raci-matrix.mp4',
     width: 1440,

@@ -624,6 +624,13 @@ function renderHome(data) {
     '  <p class="pr-lede">A working reference for the frameworks content strategists actually use. ' +
       'Easily look up what each one is and when to reach for it. ' +
       data.TOOLS.length + ' tools across ' + data.CATEGORY_ORDER.length + ' categories.</p>',
+    // Crawlable stand-in for the SPA's homepage filmstrip.
+    '  <ul class="pr-featured">',
+    '    <li><a href="/workspace/">Workspace</a>, Build your plan.</li>',
+    '    <li><a href="/survey/">Practitioner survey</a>, Take the survey.</li>',
+    '    <li><a href="/recommend/">Tool Recommender</a>, Find your tools.</li>',
+    '    <li><a href="/best-of-2026/">Best of 2026</a>, Nominations open.</li>',
+    '  </ul>',
     sections,
     '</div>',
     siteFooterStatic()

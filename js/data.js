@@ -2288,6 +2288,102 @@ window.TOOL_VIDEOS = {
     height: 810,
     label: 'Topic Clusters explainer'
   },
+  cardsort: {
+    src: '/videos/card-sorting.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Card Sorting explainer'
+  },
+  gap: {
+    src: '/videos/competitive-content-gap-analysis.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Competitive Content Gap Analysis explainer'
+  },
+  audit: {
+    src: '/videos/content-audit-inventory.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Content Audit explainer'
+  },
+  contentdesign: {
+    src: '/videos/content-design-the-gov-uk-method.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Content Design explainer'
+  },
+  charter: {
+    src: '/videos/content-marketing-charter.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Content Marketing Charter explainer'
+  },
+  pillars: {
+    src: '/videos/content-pillars-themes.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Content Pillars explainer'
+  },
+  coremodel: {
+    src: '/videos/the-core-model.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Core Model explainer'
+  },
+  mission: {
+    src: '/videos/editorial-mission-statement.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Editorial Mission Statement explainer'
+  },
+  sitemap: {
+    src: '/videos/information-architecture-sitemap.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Information Architecture explainer'
+  },
+  rot: {
+    src: '/videos/rot-analysis.mp4',
+    width: 1440,
+    height: 810,
+    label: 'ROT Analysis explainer'
+  },
+  taya: {
+    src: '/videos/they-ask-you-answer-the-big-5.mp4',
+    width: 1440,
+    height: 810,
+    label: 'They Ask, You Answer explainer'
+  },
+  brief: {
+    src: '/videos/content-brief.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Content Brief explainer'
+  },
+  scorecard: {
+    src: '/videos/content-quality-scorecard.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Content Quality Scorecard explainer'
+  },
+  workflow: {
+    src: '/videos/content-workflow-process-map.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Content Workflow explainer'
+  },
+  styleguide: {
+    src: '/videos/editorial-style-guide.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Editorial Style Guide explainer'
+  },
+  swot: {
+    src: '/videos/content-swot.mp4',
+    width: 1440,
+    height: 810,
+    label: 'Content SWOT explainer'
+  },
   raci: {
     src: '/videos/raci-matrix.mp4',
     width: 1440,

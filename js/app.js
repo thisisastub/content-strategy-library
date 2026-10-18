@@ -509,7 +509,7 @@
           '<a class="soft-highlight" href="/about/">About</a>' +
           '<button type="button" class="soft-highlight footer__linkbtn" data-action="credits-open">Imagery credits</button>' +
           '<a class="soft-highlight" href="/privacy/">Privacy</a>' +
-          '<button type="button" class="footer__cookie-prefs soft-highlight" onclick="if(window.openCookiePrefs)openCookiePrefs()">Cookie preferences</button>' +
+          '<button type="button" class="footer__cookie-prefs soft-highlight">Cookie preferences</button>' +
         '</nav>' +
       '</div></footer>';
   }

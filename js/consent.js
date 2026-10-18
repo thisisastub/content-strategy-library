@@ -108,6 +108,11 @@
     if (bar) return;
     openGate(false);
   };
+  // Delegated, so it covers the prerendered footer and the SPA footer the app
+  // re-renders, without an inline onclick (the CSP blocks inline handlers).
+  document.addEventListener('click', function (e) {
+    if (e.target.closest && e.target.closest('.pr-cookie-prefs, .footer__cookie-prefs')) window.openCookiePrefs();
+  });
 
   // ---- boot ----------------------------------------------------
   function boot() {

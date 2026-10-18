@@ -271,6 +271,14 @@ function stampLastUpdated(iso) {
 }
 
 /* ---------- shared page chrome ---------- */
+// The GA consent-default snippet stays inline so it runs before gtag.js arrives.
+// The CSP allows it by hash rather than 'unsafe-inline'; the hash is computed
+// here, so editing the snippet can never leave a stale hash behind.
+const GA_INLINE = 'window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}' +
+  'gtag("consent","default",{ad_storage:"denied",ad_user_data:"denied",ad_personalization:"denied",analytics_storage:"denied",wait_for_update:500});' +
+  'gtag("js",new Date());gtag("config","' + GA_MEASUREMENT_ID + '");';
+const GA_INLINE_HASH = "'sha256-" + crypto.createHash('sha256').update(GA_INLINE, 'utf8').digest('base64') + "'";
+
 function head(opts) {
   // opts: { title, description, canonical, ogType, robots, jsonld[] }
   const canonical = opts.canonical;
@@ -287,15 +295,18 @@ function head(opts) {
     '<head>',
     '  <meta charset="utf-8">',
     '  <meta name="viewport" content="width=device-width, initial-scale=1">',
-    // Content-Security-Policy (defense-in-depth). 'unsafe-inline' is needed for the inline
-    // GA config + inline style attributes; 'unsafe-eval' is required by the PPTX/DOCX export
-    // libraries (they use Function("return this")). Sources are the only external hosts used.
+    // Content-Security-Policy (defense-in-depth). Deny by default, then allow each resource
+    // type explicitly. Scripts: own files, the GA snippet by hash, GA and Tally hosts; no
+    // 'unsafe-inline' or 'unsafe-eval' (the export libraries only try eval inside try/catch
+    // fallbacks). 'unsafe-inline' remains in style-src for inline style attributes.
+    // frame-ancestors is ignored in a <meta> CSP; Cloudflare's X-Frame-Options covers framing.
     '  <meta http-equiv="Content-Security-Policy" content="' + [
-      "default-src \'self\'",
-      "script-src \'self\' \'unsafe-inline\' \'unsafe-eval\' https://www.googletagmanager.com https://tally.so",
+      "default-src \'none\'",
+      "script-src \'self\' " + GA_INLINE_HASH + " https://www.googletagmanager.com https://tally.so",
       "style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com",
       "font-src \'self\' https://fonts.gstatic.com",
       "img-src \'self\' data: https://www.google-analytics.com https://www.googletagmanager.com",
+      "media-src \'self\'",
       "connect-src \'self\' https://api.web3forms.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com",
       "form-action \'self\' https://api.web3forms.com",
       "frame-src https://tally.so",
@@ -304,9 +315,7 @@ function head(opts) {
     ].join('; ') + '">',
     '  <!-- Google tag (gtag.js), GA4 -->',
     '  <script async src="https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID + '"></script>',
-    '  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}' +
-      'gtag("consent","default",{ad_storage:"denied",ad_user_data:"denied",ad_personalization:"denied",analytics_storage:"denied",wait_for_update:500});' +
-      'gtag("js",new Date());gtag("config","' + GA_MEASUREMENT_ID + '");</script>',
+    '  <script>' + GA_INLINE + '</script>',
     '  <title>' + esc(opts.title) + '</title>',
     '  <meta name="description" content="' + escAttr(opts.description) + '">',
     '  <meta name="robots" content="' + robots + '">',
@@ -367,7 +376,7 @@ function siteFooterStatic() {
     '    <a href="/faq/">FAQ</a>',
     '    <a href="/about/">About</a>',
     '    <a href="/privacy/">Privacy</a>',
-    '    <button type="button" class="pr-cookie-prefs" onclick="openCookiePrefs()">Cookie preferences</button>',
+    '    <button type="button" class="pr-cookie-prefs">Cookie preferences</button>',
     '  </nav>',
     '  <p>Created by <a href="' + AUTHOR.url + '" rel="author">' + AUTHOR.name + '</a>. ' +
       'All content may be freely duplicated and used anywhere, without permission. ' +
